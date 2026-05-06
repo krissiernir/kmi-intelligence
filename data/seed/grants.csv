@@ -1,0 +1,4 @@
+id,name_is,name_en,category,project_types,best_stage,purpose,eligibility_summary,max_amount_isk,deadline_type,source_id,last_checked,confidence
+1,Handritsstyrkur,Screenwriting Grant,screenwriting,"feature; series",script,Support writing and script development,SAMPLE summary only; verify official eligibility,5000000,windowed,1,2026-05-06,needs_verification
+2,Þróunarstyrkur,Development Grant,development,"feature; documentary",development,Support creative and production development,SAMPLE summary only; verify official eligibility,15000000,windowed,1,2026-05-06,sample
+3,Framleiðslustyrkur,Production Grant,production,"feature; documentary",production,Support principal production financing,SAMPLE summary only; verify official eligibility,120000000,windowed,1,2026-05-06,needs_verification

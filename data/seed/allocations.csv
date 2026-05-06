@@ -1,0 +1,4 @@
+id,project_title,year,date,grant_id,grant_category_raw,grant_name_raw,amount_isk,company_name,producer_name,director_name,writer_name,format,stage,source_id,notes
+1,SAMPLE NORTH WIND,2024,2024-03-10,2,development,Þróunarstyrkur,12000000,Volcano Films,Anna Producer,Jón Director,Ragna Writer,feature,development,4,SAMPLE data not official award record
+2,SAMPLE FROST ROAD,2024,2024-10-12,3,production,Framleiðslustyrkur,85000000,Arctic Pictures,Björn Producer,Sara Director,Sara Director,feature,production,4,SAMPLE data not official award record
+3,SAMPLE DEEP LAVA,2025,2025-02-15,2,development,Þróunarstyrkur,9000000,Volcano Films,Anna Producer,Karl Director,Inga Writer,documentary,development,5,SAMPLE data not official award record
