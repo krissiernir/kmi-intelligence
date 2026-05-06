@@ -1,0 +1,6 @@
+id,name_is,name_en,document_type,purpose,what_it_must_prove,common_weaknesses,template_path,prompt_path
+1,Handrit,Script,creative,Show artistic core,Story quality and viability,Unclear arc or weak structure,prompts/templates/script_template.md,prompts/script_prompt.txt
+2,Fjárhagsáætlun,Budget,financial,Show execution credibility,Realistic production planning,Missing line items or financing gaps,prompts/templates/budget_template.csv,prompts/budget_prompt.txt
+3,Fjármögnunaráætlun,Finance Plan,financial,Show funding strategy,Path to complete financing,Unclear sources and timing,prompts/templates/finance_plan.md,prompts/finance_plan_prompt.txt
+4,Leikstjóra statement,Director Statement,creative,Show vision and execution,Coherent artistic intent,Generic style without specifics,prompts/templates/director_statement.md,prompts/director_statement_prompt.txt
+5,Framleiðanda statement,Producer Statement,production,Show producer strategy,Feasibility and risk management,No risk mitigation logic,prompts/templates/producer_statement.md,prompts/producer_statement_prompt.txt

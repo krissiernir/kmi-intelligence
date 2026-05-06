@@ -1,0 +1,6 @@
+id,grant_id,criterion_id,importance,notes
+1,2,1,high,SAMPLE mapping
+2,2,2,high,SAMPLE mapping
+3,2,3,medium,SAMPLE mapping
+4,3,1,high,SAMPLE mapping
+5,3,2,high,SAMPLE mapping

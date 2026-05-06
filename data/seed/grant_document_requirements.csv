@@ -1,0 +1,10 @@
+id,grant_id,document_id,requirement_level,notes,source_id,confidence
+1,2,1,required,SAMPLE linkage only,2,sample
+2,2,2,required,SAMPLE linkage only,2,sample
+3,2,3,recommended,SAMPLE linkage only,2,sample
+4,2,4,strategic,SAMPLE linkage only,2,sample
+5,2,5,recommended,SAMPLE linkage only,2,sample
+6,1,1,required,SAMPLE linkage only,2,sample
+7,3,1,required,SAMPLE linkage only,2,sample
+8,3,2,required,SAMPLE linkage only,2,sample
+9,3,3,required,SAMPLE linkage only,2,sample
