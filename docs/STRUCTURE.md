@@ -135,12 +135,12 @@ TEXT-keyed. Built by `compile.py`.
   confidence, status) — **907** resolution-log rows. ER policy: strong-key/exact-norm auto-link;
   fuzzy candidates park `status='unresolved'` (33) for human review — **never silently merged**.
 
-Ingesters: `ingest/{kvikmyndir,wikipedia_films,producers_is,imdb_datasets,imdb_enrich,imdb_resolve}.py`.
-The IMDb fold (B4) lives in `compile.py`, reading `data/raw/imdb_full/<tt>.json` (full credits via the
-`imdbinfo` library, run from `.venv-imdb`; `src.imdbinfo` PRIMARY, `src.imdb_datasets` fallback).
-`imdb_resolve.py` finds tconsts for catalog titles that lack one (writes `data/curated/imdb_links.json`,
-which `compile.py` backfills). MCP: `lookup_person`, `lookup_company` (generated dossiers). Films behind
-kvikmyndir.is Algolia were avoided in favour of CC-licensed Wikipedia.
+Ingesters: `ingest/{kvikmyndir,wikipedia_films,producers_is}.py` + `ingest/imdb.py` (one module,
+subcommands `datasets|enrich|verify|resolve`). The IMDb fold (B4) lives in `compile.py`, reading
+`data/raw/imdb_full/<tt>.json` (full credits via the `imdbinfo` library, run from `.venv-imdb`;
+`src.imdbinfo` PRIMARY, `src.imdb_datasets` fallback). `imdb resolve` finds tconsts for catalog titles
+that lack one (writes `data/curated/imdb_links.json`, which `compile.py` backfills). MCP: `lookup_person`,
+`lookup_company` (generated dossiers). Films behind kvikmyndir.is Algolia were avoided for CC-licensed Wikipedia.
 
 ### Zone 3 — CORPUS + landscape facts (reads Zone 1/2; grant tools NEVER join these)
 Source: Klapptré.is (`src.klapptre`) via its WordPress REST API. Journalistic/copyrighted →

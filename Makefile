@@ -1,6 +1,6 @@
 PYTHON ?= python3
 
-.PHONY: init run fetch parse kvik wiki-films producers klapptre imdb-datasets imdb-setup imdb-enrich build packs embed embed-setup rag-search publish mcp mcp-setup all
+.PHONY: init run fetch parse kvik wiki-films producers klapptre imdb-datasets imdb-verify imdb-setup imdb-enrich imdb-resolve build packs health embed embed-setup rag-search publish mcp mcp-setup all
 
 init:           ## install dashboard deps (streamlit/pandas) into the active env
 	$(PYTHON) -m pip install -r requirements.txt
@@ -25,17 +25,26 @@ klapptre:       ## Zone 3: Klapptré fact articles -> data/raw/klapptre/ (KMI_CA
 	$(PYTHON) -m src.kmi_intelligence.ingest.klapptre
 
 imdb-datasets:  ## FALLBACK: principal cast/crew from official IMDb bulk datasets -> data/raw/imdb/
-	$(PYTHON) -m src.kmi_intelligence.ingest.imdb_datasets
+	$(PYTHON) -m src.kmi_intelligence.ingest.imdb datasets
 
-imdb-setup:     ## one-time: py3.12 venv + imdbinfo (needs uv) for the full-credits enricher
+imdb-verify:    ## validate our tconsts against IMDb title.basics -> data/raw/imdb/verify.json
+	$(PYTHON) -m src.kmi_intelligence.ingest.imdb verify
+
+imdb-setup:     ## one-time: py3.12 venv + imdbinfo (needs uv) for enrich/resolve
 	uv venv --python 3.12 .venv-imdb
 	VIRTUAL_ENV=.venv-imdb uv pip install imdbinfo
 
 imdb-enrich:    ## PRIMARY: full IMDb credits (crew/companies/box-office) -> data/raw/imdb_full/ (folded by build)
-	PYTHONPATH=src .venv-imdb/bin/python -m kmi_intelligence.ingest.imdb_enrich
+	PYTHONPATH=src .venv-imdb/bin/python -m kmi_intelligence.ingest.imdb enrich
+
+imdb-resolve:   ## find tconsts for catalog titles lacking one -> data/curated/imdb_links.json
+	PYTHONPATH=src .venv-imdb/bin/python -m kmi_intelligence.ingest.imdb resolve
 
 packs:          ## build/kmi.db -> build/prompt_packs/
 	$(PYTHON) -m src.kmi_intelligence.packs
+
+health:         ## data-health cockpit -> build/HEALTH.md (coverage, queues, drift vs last run)
+	$(PYTHON) -m src.kmi_intelligence.health
 
 EMBED_PY ?= .venv-rag/bin/python
 EMBED_BACKEND ?= local        # local | hash | openai | voyage
