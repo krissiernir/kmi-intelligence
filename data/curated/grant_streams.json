@@ -1,0 +1,314 @@
+{
+  "_about": "Every KMÍ application stream (gátta). gatta_id is verified against the live portal (umsokn.kvikmyndamidstod.is). Amounts/rules/documents are from manual curation cross-referenced with the styrkir page; confidence=needs_verification until checked field-by-field against official rule text.",
+  "_portal_url_pattern": "https://umsokn.kvikmyndamidstod.is/web/portal/application.html?id={gatta_id}",
+  "_default_meta": {"sources": ["src.manual_curation", "src.kmi_styrkir", "src.umsoknagatt"], "confidence": "needs_verification", "checked_at": "2026-06-19"},
+  "streams": [
+    {
+      "id": "heimild.handrit",
+      "gatta_id": "VV0GSX",
+      "name_is": "Heimildamynd - Handritsstyrkur",
+      "name_en": "Documentary - Screenwriting grant",
+      "family": "handrit", "format_track": "heimildamynd", "stage": "handrit", "level": 1,
+      "purpose": "Framlag til handritsgerðar heimildamyndar.",
+      "max_amount_isk": 600000,
+      "amount_basis": "1 þrep. Úthlutanir 2024 segja allt að 600.000. Eldri 'styrkir-gamla' síða segir 1.500.000 (sennilega úrelt). Engin núverandi opinber handritssíða fyrir heimildamyndir fannst — needs_verification. Sjá grant_amounts.json.",
+      "documents": {
+        "required": ["Logline (1-2 setningar á íslensku)", "Útdráttur (allt að ein síða á íslensku)", "Sögulýsing / Treatment", "Ítarleg greinargerð kvikmyndahöfundar (efnistök, form, sjónræn nálgun)", "Framvinduáætlun og kostnaðaráætlun handritsgerðar", "Ferilskrár lykilstarfsmanna"]
+      }
+    },
+    {
+      "id": "heimild.throun_1",
+      "gatta_id": "CXOXZX",
+      "name_is": "Heimildamynd - Þróunarstyrkur I",
+      "name_en": "Documentary - Development grant I",
+      "family": "throun", "format_track": "heimildamynd", "stage": "throun", "level": 1,
+      "purpose": "Þróun heimildamyndar (fyrra stig).",
+      "max_amount_isk": null,
+      "amount_basis": "Þróunarstyrkir til heimildamynda eru veittir eftir framvindu (live: þróunarsíða) — engin föst hámarksupphæð. Sögulega var aðeins 'frekari þróun' (stig II) tilgreind = 5.0M.",
+      "documents": {
+        "required": ["Handrit eða ítarleg meðferð (treatment)", "Greinargerð leikstjóra og framleiðanda", "Kostnaðaráætlun og fjármögnunaráætlun þróunar", "Samningur við handritshöfund / leikstjóra"]
+      }
+    },
+    {
+      "id": "heimild.throun_2",
+      "gatta_id": "QPKXLS",
+      "name_is": "Heimildamynd - Þróunarstyrkur II",
+      "name_en": "Documentary - Development grant II",
+      "family": "throun", "format_track": "heimildamynd", "stage": "throun", "level": 2,
+      "purpose": "Þróun heimildamyndar (seinna stig).",
+      "max_amount_isk": null,
+      "amount_basis": "Veitt eftir framvindu (live: þróunarsíða) — engin föst hámarksupphæð núna. Sögulega 'frekari þróun' allt að 5.000.000 (úthl. 2021-2023; sjá grant_amounts.json).",
+      "documents": {
+        "required": ["Uppfært handrit / ítarleg lýsing", "Sjónræn nálgun (moodboard/teaser hlekkur)", "Uppfærð kostnaðar- og fjármögnunaráætlun"]
+      },
+      "notes": "Á þróunarstigi heimildamynda skiptir teaser / sýnishorn (mood-reel) miklu við mat ráðgjafa."
+    },
+    {
+      "id": "heimild.framleidsla",
+      "gatta_id": "HRBZFP",
+      "name_is": "Heimildamynd - Framleiðslustyrkur",
+      "name_en": "Documentary - Production grant",
+      "family": "framleidsla", "format_track": "heimildamynd", "stage": "framleidsla", "level": null,
+      "purpose": "Framlag til framleiðslu heimildamyndar.",
+      "documents": {
+        "required": ["Fullbúið handrit / treatment", "Yfirlýsingar/samningar við helstu rétthafa og listræna stjórnendur", "Kostnaðaráætlun fyrir framleiðslu (á markaðsvirði)", "Fjármögnunaráætlun (samningar og vilyrði)", "Dreifingar- og markaðsáætlun"]
+      }
+    },
+
+    {
+      "id": "sjonvarp.handrit_1",
+      "gatta_id": "RGQHHO",
+      "name_is": "Leikið sjónvarpsefni - Handritsstyrkur I",
+      "name_en": "Scripted TV - Screenwriting grant I",
+      "family": "handrit", "format_track": "leikid_sjonvarp", "stage": "handrit", "level": 1,
+      "purpose": "Framlag til að skrifa fyrstu drög að handriti fyrir 1. og 2. þátt (pilot & episode 2) auk söguþráða fyrir hvern annan þátt.",
+      "max_amount_isk": 1500000,
+      "amount_basis": "Hámarksupphæð 1.500.000 (1. handritsstyrkur, live: handrit_sjonvarp síða, verified). Heildarþak handritsstyrkja per verkefni 3.0M. Úthlutanir sýna útgreiðslu í hlutum (sögul. 600k/1.4M/1.0M) — útgreiðslustruktúr, ekki hámark; sjá grant_amounts.json.",
+      "payment_split": "Höfundur 80% / framleiðandi 20% (ef sótt er um í teymi)",
+      "rules": {
+        "nylidar_krafa": "Umsókn styrkist ef reyndur framleiðandi er kominn að, en ekki fortakslaust skilyrði í Stig I.",
+        "barnaefni_regla": "Efni fyrir 12 ára og yngri: greinargerð höfundar skal fjalla ítarlega um markhóp/stíl/nálgun; framvinduáætlun miði við skil næsta stigs innan 4 mánaða."
+      },
+      "documents": {
+        "required": ["Ferilskrár höfunda (max 2 bls.)", "Vottorð úr fyrirtækjaskrá (ef fyrirtæki)", "Rétthafasamningar (option/yfirfærsla réttinda)", "Drög að þáttahandbók (Draft Show Bible)", "Sögulýsing fyrir fyrsta þátt (8-12 bls.)", "Útdráttur fyrir aðra þætti (1-2 bls. á hvern)", "Greinargerð handritshöfunda", "Framvinduáætlun"],
+        "newcomer_extra": ["Senudæmi (3 senur: 2 myndræn sýn, 1 samtöl)"]
+      }
+    },
+    {
+      "id": "sjonvarp.handrit_2",
+      "gatta_id": "WFBYW2",
+      "name_is": "Leikið sjónvarpsefni - Handritsstyrkur II",
+      "name_en": "Scripted TV - Screenwriting grant II",
+      "family": "handrit", "format_track": "leikid_sjonvarp", "stage": "handrit", "level": 2,
+      "purpose": "Framlag til að skrifa handrit að öllum þáttum þáttaraðarinnar út frá fyrri drögum.",
+      "max_amount_isk": 1500000,
+      "amount_basis": "Hámarksupphæð 1.500.000 (2. handritsstyrkur, live: handrit_sjonvarp, verified). Sjá grant_amounts.json fyrir sögulega útgreiðslustruktúr.",
+      "payment_split": "Höfundur 80% / framleiðandi 20% (ef sótt er um í teymi)",
+      "rules": {
+        "nylidar_krafa": "Ef höfundur er nýliði er krafa að reyndur framleiðandi sé kominn að og greinargerð hans fylgi.",
+        "bible_krafa": "Krafa um ítarlegri og myndskreytta þáttahandbók (persónur, stíll, heimur, heildarsöguþráð)."
+      },
+      "documents": {
+        "required": ["Ferilskrár höfunda", "Vottorð úr fyrirtækjaskrá (ef fyrirtæki)", "Rétthafasamningar", "Ítarleg og myndskreytt þáttahandbók (Show Bible)", "Handrit að 1. og 2. þætti", "Útdráttur fyrir aðra þætti (1-2 bls. á hvern)", "Greinargerð handritshöfunda", "Framvinduáætlun"],
+        "newcomer_extra": ["Greinargerð framleiðanda (greining á handriti, markaðsmöguleikum, framleiðsluumhverfi)"],
+        "optional": ["Áhugayfirlýsing (LOI) frá innlendri/erlendri sjónvarpsstöð/streymisveitu"]
+      }
+    },
+    {
+      "id": "sjonvarp.handrit_3",
+      "gatta_id": "2D61HS",
+      "name_is": "Leikið sjónvarpsefni - Handritsstyrkur III",
+      "name_en": "Scripted TV - Screenwriting grant III",
+      "family": "handrit", "format_track": "leikid_sjonvarp", "stage": "handrit", "level": 3,
+      "purpose": "Aðeins fyrir viðamiklar/flóknar þáttaraðir: frekari þróun, rýni og endurskrif á fullskrifuðum handritum.",
+      "max_amount_isk": 3000000,
+      "amount_basis": "Hámarksupphæð 3.000.000 (3. handritsstyrkur, live: handrit_sjonvarp, verified) — aðeins fyrir viðamiklar raðir. Heildarþak handritsstyrkja per verkefni 3.0M.",
+      "rules": {
+        "skilyrdi": "Aðeins veitt í undantekningartilfellum (t.d. sögulegar/alþjóðlegar þáttaraðir með writer's room eða mörgum uppköstum).",
+        "sjonvarpsstod_krafa": "Mælt með að samningur/vilyrði við sjónvarpsstöð liggi fyrir."
+      },
+      "documents": {
+        "required": ["Ferilskrár höfunda", "Vottorð úr fyrirtækjaskrá (ef fyrirtæki)", "Rétthafasamningar", "Fullbúin þáttahandbók (Show Bible)", "Fullskrifað handrit fyrir alla þáttaröðina (eða a.m.k. 4 þætti)", "Heildarútdráttur fyrir alla þáttaröðina (1-2 bls.)", "Greinargerð handritshöfunda", "Greinargerð framleiðanda", "Framvinduáætlun", "Drög að kostnaðaráætlun framleiðslu", "Bráðabirgða fjármögnunaráætlun"]
+      }
+    },
+    {
+      "id": "sjonvarp.throun_1",
+      "gatta_id": "XSLQ7F",
+      "name_is": "Leikið sjónvarpsefni - Þróunarstyrkur I",
+      "name_en": "Scripted TV - Development grant I",
+      "family": "throun", "format_track": "leikid_sjonvarp", "stage": "throun", "level": 1,
+      "purpose": "Þróun leikins sjónvarpsefnis (fyrra stig).",
+      "max_amount_isk": null,
+      "amount_basis": "Upphæð fer eftir umfangi verkefnis (live: þróunarsíða). Engin föst hámarksupphæð. Sögulega allt að ~2.5M (1. hluti); sjá grant_amounts.json.",
+      "documents": {
+        "required": ["Nýjasta útgáfa handrits / Þáttahandbókar (Showbible)", "Greinargerð leikstjóra (myndræn sýn, leikstjórnarstíll, moodboard)", "Greinargerð framleiðanda (fjármögnun, markaðsgreining, dreifing)", "Nákvæm kostnaðar- og fjármögnunaráætlun þróunarfasa", "Samningar við leikstjóra, höfund og lykilstarfsmenn", "Ferilskrár lykilgerðarfólks", "Vottorð úr fyrirtækjaskrá"]
+      }
+    },
+    {
+      "id": "sjonvarp.throun_2",
+      "gatta_id": "FLQNR7",
+      "name_is": "Leikið sjónvarpsefni - Þróunarstyrkur II",
+      "name_en": "Scripted TV - Development grant II",
+      "family": "throun", "format_track": "leikid_sjonvarp", "stage": "throun", "level": 2,
+      "purpose": "Þróun leikins sjónvarpsefnis (seinna stig).",
+      "max_amount_isk": null,
+      "amount_basis": "Upphæð fer eftir umfangi (live). Aðeins veitt verkefnum með vilyrði fyrir framleiðslustyrk. Sögulega allt að ~3.5M (2. hluti); sjá grant_amounts.json.",
+      "documents": {
+        "required": ["Nýjasta útgáfa handrits / Þáttahandbókar (Showbible)", "Greinargerð leikstjóra (myndræn sýn, leikstjórnarstíll, moodboard)", "Greinargerð framleiðanda (fjármögnun, markaðsgreining, dreifing)", "Nákvæm kostnaðar- og fjármögnunaráætlun þróunarfasa", "Samningar við leikstjóra, höfund og lykilstarfsmenn", "Ferilskrár lykilgerðarfólks", "Vottorð úr fyrirtækjaskrá"]
+      }
+    },
+    {
+      "id": "sjonvarp.framleidsla",
+      "gatta_id": "O0NL3H",
+      "name_is": "Leikið sjónvarpsefni - Framleiðslustyrkur",
+      "name_en": "Scripted TV - Production grant",
+      "family": "framleidsla", "format_track": "leikid_sjonvarp", "stage": "framleidsla", "level": null,
+      "purpose": "Framlag til framleiðslu leikins sjónvarpsefnis.",
+      "documents": {
+        "required": ["Öll handrit og þáttahandbók", "Framleiðslu- og tökuáætlun", "Samningar við sýningaraðila (t.d. RÚV, Stöð 2)", "Heildstæð kostnaðar- og fjármögnunaráætlun"]
+      }
+    },
+
+    {
+      "id": "leikin.handrit_1",
+      "gatta_id": "CUPCLS",
+      "name_is": "Leikin mynd - Handritsstyrkur I",
+      "name_en": "Feature film - Screenwriting grant I",
+      "family": "handrit", "format_track": "leikin_kvikmynd", "stage": "handrit", "level": 1,
+      "purpose": "Framlag til að skrifa fyrsta uppkast að kvikmyndahandriti byggt á sögulýsingu (treatment).",
+      "max_amount_isk": 1500000,
+      "amount_basis": "Hámarksupphæð 1.500.000 (1. handritsstyrkur, live: handrit_leiknar síða, verified). Útgreiðsla í allt að 3 hlutum eftir framvindu (sögul. 600k/1.0M/1.4M) — útgreiðslustruktúr, ekki hámark; sjá grant_amounts.json.",
+      "payment_split": "Höfundur 80% / framleiðandi 20% (ef sótt er um í teymi)",
+      "rules": {
+        "nylidar_krafa": "Umsókn styrkist ef reyndur framleiðandi er kominn að, en ekki fortakslaust skilyrði í Stig I.",
+        "rettindi": "Framleiðandi getur sótt um 1. handritsstyrk til kaupa á höfundarrétti verks (t.d. skáldsögu)."
+      },
+      "documents": {
+        "required": ["Ferilskrár höfunda", "Vottorð úr fyrirtækjaskrá (ef fyrirtæki)", "Rétthafasamningar (option/staðfesting réttinda)", "Stuttur útdráttur (synopsis á íslensku)", "Sögulýsing (Treatment 12-30 bls.)", "Greinargerð handritshöfundar", "Framvinduáætlun"],
+        "newcomer_extra": ["Senudæmi (3 senur: 2 myndræn sýn, 1 samtöl)"],
+        "optional": ["Greinargerð framleiðanda"]
+      }
+    },
+    {
+      "id": "leikin.handrit_1_2",
+      "gatta_id": "MFLH1S",
+      "name_is": "Leikin mynd - Handritsstyrkur I + II",
+      "name_en": "Feature film - Screenwriting grant I + II",
+      "family": "handrit", "format_track": "leikin_kvikmynd", "stage": "handrit", "level": 12,
+      "purpose": "Sameiginleg umsókn fyrir reynda höfunda: skrifa og þróa handrit frá sögulýsingu yfir í fullbúið handrit í einum áfanga.",
+      "max_amount_isk": 3000000,
+      "amount_basis": "Hámarksupphæð 3.000.000 (1.+2. handritsstyrkur samtímis, live: handrit_leiknar, verified) — aðeins reyndir höfundar.",
+      "payment_split": "Höfundur 80% / framleiðandi 20% (ef sótt er um í teymi)",
+      "rules": {
+        "umsakjandi_takmorkun": "Aðeins opið fyrir reynda höfunda (skv. skilgreiningu KMÍ). Nýliðar geta ekki sótt um.",
+        "eftirfylgni_takmorkun": "Höfundur getur ekki sótt um handritsstyrk aftur fyrr en verkefni er skilað fullskrifuðu með ítarlegri greinargerð um þróun."
+      },
+      "documents": {
+        "required": ["Ferilskrár höfunda (sýna reynslukröfur)", "Vottorð úr fyrirtækjaskrá (ef fyrirtæki)", "Rétthafasamningar (Option/Chain of Title)", "Stuttur útdráttur (Synopsis)", "Sögulýsing (Treatment 12-30 bls.) EÐA fyrsta grófa uppkast", "Greinargerð handritshöfundar", "Framvinduáætlun"],
+        "optional": ["Greinargerð framleiðanda"]
+      }
+    },
+    {
+      "id": "leikin.handrit_2",
+      "gatta_id": "UHPP3T",
+      "name_is": "Leikin mynd - Handritsstyrkur II",
+      "name_en": "Feature film - Screenwriting grant II",
+      "family": "handrit", "format_track": "leikin_kvikmynd", "stage": "handrit", "level": 2,
+      "purpose": "Framlag til frekari þróunar, endurskrifa og fínstillingar á þegar fullskrifuðu fyrsta uppkasti.",
+      "max_amount_isk": 1500000,
+      "amount_basis": "Hámarksupphæð 1.500.000 (2. handritsstyrkur, frekari þróun á fullskrifuðu handriti, live: handrit_leiknar, verified). Sjá grant_amounts.json fyrir útgreiðslustruktúr.",
+      "payment_split": "Höfundur 80% / framleiðandi 20% (ef sótt er um í teymi)",
+      "rules": {
+        "nylidar_krafa": "Hjá nýliðum/reynsluminni er fortakslaust skilyrði að reyndur framleiðandi sé kominn að og greinargerð hans fylgi.",
+        "takmorkun_umsokna": "Hvert verkefni getur einungis sótt um tvisvar í þennan flokk nema verulegar breytingar hafi orðið."
+      },
+      "documents": {
+        "required": ["Ferilskrár höfunda", "Vottorð úr fyrirtækjaskrá (ef fyrirtæki)", "Rétthafasamningar (Option/höfundasamningur)", "Stuttur útdráttur (Synopsis)", "Uppkast að handriti í fullri lengd", "Greinargerð handritshöfundar (rýni á 1. uppkast, hvað á að bæta)", "Framvinduáætlun"],
+        "newcomer_extra": ["Greinargerð framleiðanda (greining á handriti, áætluð þróun, markaðsmöguleikar)"],
+        "optional": ["Greinargerð framleiðanda (fyrir reynda)"]
+      }
+    },
+    {
+      "id": "leikin.throun_1",
+      "gatta_id": "UJDT4B",
+      "name_is": "Leikin mynd - Þróunarstyrkur I",
+      "name_en": "Feature film - Development grant I",
+      "family": "throun", "format_track": "leikin_kvikmynd", "stage": "throun", "level": 1,
+      "purpose": "Þróun leikinnar kvikmyndar (fyrra stig).",
+      "max_amount_isk": null,
+      "amount_basis": "Upphæð fer eftir umfangi verkefnis (live: þróunarsíða). Verkefni með framleiðsluvilyrði njóta forgangs. Sögulega allt að ~2.5M (1. hluti); sjá grant_amounts.json.",
+      "documents": {
+        "required": ["Nýjasta útgáfa handrits", "Greinargerð leikstjóra (myndræn sýn, leikstjórnarstíll, moodboard)", "Greinargerð framleiðanda (fjármögnun, markaðsgreining, dreifing)", "Nákvæm kostnaðar- og fjármögnunaráætlun þróunarfasa", "Samningar við leikstjóra, höfund og lykilstarfsmenn", "Ferilskrár lykilgerðarfólks", "Vottorð úr fyrirtækjaskrá"]
+      }
+    },
+    {
+      "id": "leikin.throun_2",
+      "gatta_id": "K7BJJS",
+      "name_is": "Leikin mynd - Þróunarstyrkur II",
+      "name_en": "Feature film - Development grant II",
+      "family": "throun", "format_track": "leikin_kvikmynd", "stage": "throun", "level": 2,
+      "purpose": "Þróun leikinnar kvikmyndar (seinna stig).",
+      "max_amount_isk": null,
+      "amount_basis": "Upphæð fer eftir umfangi (live). Aðeins veitt verkefnum með vilyrði fyrir framleiðslustyrk. Sögulega allt að ~3.5M (2. hluti); sjá grant_amounts.json.",
+      "documents": {
+        "required": ["Nýjasta útgáfa handrits", "Greinargerð leikstjóra (myndræn sýn, leikstjórnarstíll, moodboard)", "Greinargerð framleiðanda (fjármögnun, markaðsgreining, dreifing)", "Nákvæm kostnaðar- og fjármögnunaráætlun þróunarfasa", "Samningar við leikstjóra, höfund og lykilstarfsmenn", "Ferilskrár lykilgerðarfólks", "Vottorð úr fyrirtækjaskrá"]
+      }
+    },
+    {
+      "id": "leikin.framleidsla",
+      "gatta_id": "LGTO9C",
+      "name_is": "Leikin mynd - Framleiðslustyrkur",
+      "name_en": "Feature film - Production grant",
+      "family": "framleidsla", "format_track": "leikin_kvikmynd", "stage": "framleidsla", "level": null,
+      "purpose": "Framlag til framleiðslu leikinnar kvikmyndar í fullri lengd.",
+      "documents": {
+        "required": ["Fullbúið handrit", "Samningar við helstu rétthafa og listræna stjórnendur", "Kostnaðaráætlun framleiðslu (markaðsvirði)", "Fjármögnunaráætlun (samningar og vilyrði)", "Framleiðslu- og tökuáætlun", "Dreifingar- og markaðsáætlun"]
+      }
+    },
+    {
+      "id": "leikin.eftirvinnsla",
+      "gatta_id": "DLP87P",
+      "name_is": "Leikin mynd - Eftirvinnslustyrkur",
+      "name_en": "Feature film - Post-production grant",
+      "family": "eftirvinnsla", "format_track": "leikin_kvikmynd", "stage": "eftirvinnsla", "level": null,
+      "purpose": "Að ljúka fulltekinni mynd: hljóðvinnsla, litgreining, VFX eða klipping.",
+      "max_amount_isk": 15000000,
+      "amount_basis": "Hámarksupphæð 15.000.000 (live: eftirvinnslustyrkir síða, verified).",
+      "documents": {
+        "required": ["Grófklipp (rough cut) eða sýnishorn (læst svæði, t.d. Vimeo)", "Sundurliðuð eftirvinnsluáætlun með tímalínu", "Kostnaðaráætlun eftirvinnslu og yfirlit yfir útlagðan kostnað", "Fjármögnunaráætlun fyrir eftirvinnslu", "Samningar við eftirvinnslufyrirtæki (hljóðver, litgreiningarstofu o.fl.)"]
+      },
+      "notes": "Grófklippið verður að sýna listræna burði verksins og að myndin sé á lokametrunum."
+    },
+
+    {
+      "id": "stuttmynd.framleidsla",
+      "gatta_id": "RYXIIO",
+      "name_is": "Leikin stuttmynd - Framleiðslustyrkur",
+      "name_en": "Short film - Production grant",
+      "family": "framleidsla", "format_track": "stuttmynd", "stage": "framleidsla", "level": null,
+      "purpose": "Framlag til framleiðslu leikinnar stuttmyndar.",
+      "documents": {"required": ["Fullbúið handrit", "Kostnaðar- og fjármögnunaráætlun", "Framleiðslu- og tökuáætlun", "Ferilskrár lykilgerðarfólks"]},
+      "_meta": {"sources": ["src.manual_curation", "src.umsoknagatt"], "confidence": "needs_verification", "checked_at": "2026-06-19", "notes": "Document list inferred from production-grant pattern; verify against portal."}
+    },
+
+    {
+      "id": "syning.syningarstyrkur",
+      "gatta_id": "UAPTYZ",
+      "name_is": "Sýningarstyrkur",
+      "name_en": "Exhibition / distribution grant",
+      "family": "annad", "format_track": "annad", "stage": "syning", "level": null,
+      "purpose": "Stuðningur við dreifingu og sýningar íslenskra kvikmynda í innlendum kvikmyndahúsum.",
+      "documents": {
+        "required": ["Sýningarsamningur við kvikmyndahús (t.d. Sambíóin, Smárabíó, Laugarásbíó, Bíó Paradís)", "Markaðs- og kynningaráætlun", "Kostnaðaráætlun markaðssetningar (P&A - Prints & Advertising)", "Yfirlýsing um áætlaðan fjölda sýningarvikna og áhorfendafjölda"]
+      }
+    },
+
+    {
+      "id": "endurgreidsla.vilyrdi",
+      "gatta_id": "JPC2GQ",
+      "name_is": "Umsókn um endurgreiðslu - vilyrði",
+      "name_en": "Production rebate - pre-approval (vilyrði)",
+      "family": "endurgreidsla", "format_track": "allt", "stage": "vilyrdi", "level": null,
+      "purpose": "Sótt um áður en tökur hefjast til að staðfesta að verkefnið sé endurgreiðsluhæft. Sjá rebate.json.",
+      "documents": {"required": ["Handrit eða ítarleg sögulýsing", "Heildarkostnaðaráætlun og áætlaður kostnaður á Íslandi", "Tökuáætlun", "Fjármögnunaráætlun (bráðabirgða)", "Vottorð úr fyrirtækjaskrá"]}
+    },
+    {
+      "id": "endurgreidsla.hlutautborgun",
+      "gatta_id": "B4OS4D",
+      "name_is": "Umsókn um endurgreiðslu - hlutaútborgun",
+      "name_en": "Production rebate - partial payout",
+      "family": "endurgreidsla", "format_track": "allt", "stage": "hlutautborgun", "level": null,
+      "purpose": "Sótt um á meðan á framleiðslu stendur (sjaldgæfara, í stórum verkefnum). Sjá rebate.json.",
+      "documents": {"required": ["Bráðabirgðauppgjör endurskoðanda á fallnum kostnaði", "Staðfesting á greiddu staðgreiðslugjaldi og virðisaukaskatti"]}
+    },
+    {
+      "id": "endurgreidsla.utborgun",
+      "gatta_id": "WQIK69",
+      "name_is": "Umsókn um endurgreiðslu - útborgun",
+      "name_en": "Production rebate - final payout",
+      "family": "endurgreidsla", "format_track": "allt", "stage": "utborgun", "level": null,
+      "purpose": "Endanleg umsókn þegar framleiðslu er lokið og allir reikningar greiddir. Sjá rebate.json.",
+      "documents": {"required": ["Endanlegt lokauppgjör framleiðslunnar", "Skýrsla löggilts endurskoðanda (raunkostnaður og greiðslur)", "Hreyfingalisti úr bókhaldskerfi framleiðslufélagsins", "Skuldleysisvottorð ríkissjóðs (ekki eldra en tveggja vikna)", "Áritun stjórnar framleiðslufélagsins (undirrituð af öllum stjórnarmönnum)", "Kvittun fyrir skilum á efni til Kvikmyndasafns Íslands"]}
+    }
+  ]
+}

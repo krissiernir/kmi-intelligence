@@ -1,62 +1,82 @@
 # kmi-intelligence
 
-Local-first grant intelligence MVP for Icelandic film producers working with KMÍ (Kvikmyndamiðstöð Íslands) and Kvikmyndasjóður.
+Local-first, source-traceable knowledge base of **everything KMÍ (Kvikmyndamiðstöð Íslands)
+offers and has funded**, plus a graph of the surrounding **Icelandic film/TV landscape** — built
+to query (SQLite), to generate prompt packs and RAG context for other projects, and to serve live
+answers over MCP. Design of record: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md); folder + data
+dictionary: [docs/STRUCTURE.md](docs/STRUCTURE.md).
 
-## What this tool is
-`kmi-intelligence` is a producer dashboard that combines:
-- grant categories,
-- document requirements,
-- evaluation criteria,
-- sample allocation analysis,
-- project readiness checks,
-into one local SQLite + Streamlit workflow.
+## How it's built — two layers
 
-It is built to support better producer decisions, not just note-taking.
+- **`data/curated/*.json`** — the source of truth. Every record carries `_meta.sources[]` and a
+  confidence level. The only layer you hand-edit.
+- **`build/`** — generated artifacts (`kmi.db`, `prompt_packs/`, `embeddings/`). Rebuilt by
+  `compile.py`, never hand-edited.
 
-## Who it is for
-- Icelandic film producers
-- Producer teams preparing KMÍ applications
-- Script/development/production teams needing structured grant intelligence
+`data/raw/` holds immutable provenance (PDFs, web snapshots, IMDb pulls); `data/staged/` holds
+machine-extracted drafts the ingesters produce before the build folds them in.
 
-## MVP status (current)
-This MVP includes:
-- A normalized SQLite schema for grants, documents, criteria, allocations, projects, and source traceability.
-- Seed loading from CSV with basic required-column validation.
-- Streamlit pages:
-  1. Home
-  2. Grant Browser
-  3. Document Matrix
-  4. Allocation Explorer
-  5. Project Readiness Checker
-  6. AI Brief Builder (prompt generation only)
+## What's in it
 
-## What it does not do yet
-- No web scraping pipeline yet.
-- No PDF parsing pipeline yet.
-- No AI API calls.
-- No authentication or hosted deployment.
-- No official legal/financial advice or official KMÍ scoring claims.
+**Zone 1 — grant core (the rulebook + ledger):**
+- 6 grant families, **22 application streams (gáttir)** with portal links, amounts, payment
+  splits, and **138 document requirements**; the rebate scheme; the contract/delivery process.
+- **Funding ledger: 793 awards (2021–2024)** parsed from the official úthlutanir PDFs — queryable
+  by year / family / company / project.
 
-## Quickstart
+**Zone 2 — landscape entity graph (the spine):**
+- **919 titles** (Wikipedia films + kvikmyndir.is series ∪ every funded project),
+  **5,587 people**, **1,019 companies** (incl. 40 SÍK members), **11,940 credits**, **1,727
+  title↔company links**, with strong keys (`imdb_nconst` / `imdb_conmst`) and an entity-resolution
+  log (`alias`, fuzzy matches parked for human review — never auto-merged).
+- **IMDb enrichment** via the `imdbinfo` library: full department crew (DoP, sound, camera,
+  art, costume, line producers…), production/sales/distribution companies, box office, awards,
+  AKAs. IMDb-derived data stays local — **never published in `export/`**.
+
+Zones depend one-way (Z2 reads Z1, never the reverse): adding messy landscape/corpus data can
+never break grant queries or the document matrix.
+
+## Consume it four ways
+
+1. **SQLite** — query `build/kmi.db` directly (schema in `docs/STRUCTURE.md`).
+2. **Prompt packs** — `build/prompt_packs/` (master digest, per-stream briefs, catalog, funding
+   analytics) and the committed `export/` drop-in for other projects.
+3. **RAG** — `build/embeddings/` (`make embed`; semantic search via `make rag-search SEARCH="…"`).
+4. **MCP** — live querying from MCP clients (`make mcp`): 10 tools incl. `lookup_person`,
+   `lookup_company`, `list_grants`, `get_document_spec`, `funding_stats`.
+
+## Build it
+
 ```bash
-python3 -m pip install -r requirements.txt
-python3 -m src.kmi_intelligence.seed
-streamlit run app/streamlit_app.py
+# ingest sources -> data/staged / data/raw
+make parse          # úthlutanir PDFs -> allocations            (needs pdftotext / poppler)
+make kvik           # kvikmyndir.is series
+make wiki-films     # Wikipedia Icelandic films
+make producers      # SÍK member companies (producers.is)
+make imdb-setup     # one-time: .venv-imdb + imdbinfo (needs uv)
+make imdb-enrich    # full IMDb credits -> data/raw/imdb_full/
+
+make build          # curated/*.json (+ IMDb fold) -> build/kmi.db   (stdlib only)
+make packs          # build/kmi.db -> build/prompt_packs/
+make publish        # rebuild + refresh the committed export/
 ```
 
-Optional shortcuts:
-```bash
-make init
-make seed
-make run
-```
+Optional: `make embed-setup`/`make embed` (RAG, `.venv-rag`), `make mcp-setup`/`make mcp` (MCP).
 
-## Data notes
-- `data/seed` currently contains SAMPLE data.
-- KMÍ URLs are official links, but many detailed values are placeholders and marked `sample` or `needs_verification`.
-- Always verify official rules against:
-  - https://www.kvikmyndamidstod.is/kvikmyndagerd/styrkir
-  - https://www.kvikmyndamidstod.is/kvikmyndagerd/leidbeiningar
-  - https://www.kvikmyndamidstod.is/kvikmyndagerd/umsoknarferlid
-  - https://www.kvikmyndamidstod.is/kvikmyndagerd/uthlutanir
-  - https://www.kvikmyndamidstod.is/kvikmyndagerd/uthlutanir/uthlutanir-fyrri-ara
+## The dashboard
+
+`make run` launches a read-only Streamlit dashboard over `build/kmi.db` (`.venv` with
+streamlit+pandas): Overview · Grant browser · Document matrix · Funding explorer ·
+Productions↔funding · People & companies · Amounts & rebate · Semantic search.
+
+## Always verify official rules against
+- https://www.kvikmyndamidstod.is/kvikmyndagerd/styrkir
+- https://www.kvikmyndamidstod.is/kvikmyndagerd/leidbeiningar
+- https://www.kvikmyndamidstod.is/kvikmyndagerd/umsoknarferlid
+- https://www.kvikmyndamidstod.is/kvikmyndagerd/uthlutanir
+
+Note the **application-max vs. disbursement-parts** distinction — see `docs/RECONCILIATION.md`.
+
+---
+The original integer-keyed MVP (CSV seed + sample Streamlit) is retired to
+`archive/mvp-legacy/` and is not used by anything here.

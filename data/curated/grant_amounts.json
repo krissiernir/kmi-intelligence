@@ -1,0 +1,131 @@
+{
+  "_about": "DISBURSEMENT STRUCTURE (not the application cap). How awarded screenwriting/development grants were paid out in parts (hlutar) by progress, per year, harvested VERBATIM from the official úthlutanir PDFs. IMPORTANT: this is distinct from the per-gátta APPLICATION MAXIMUM (Hámarksupphæð), which is on grant_streams.max_amount_isk and comes from the live styrkir detail pages — e.g. feature/TV screenwriting max is 1.5M/1.5M/3.0M, while the 2023 disbursement parts were 600k/1.0M/1.4M. `source_line` is the line in data/raw/uthlutanir/uthlutanir_<year>.txt. confidence=verified = quoted directly from the official PDF. See docs/RECONCILIATION.md.",
+  "amounts": [
+    {
+      "family": "handrit", "format_track": "leikin_kvikmynd", "year": 2021,
+      "structure": "3 hlutar eftir framvindu", "parts": [500000, 900000, 1200000], "total": 2600000,
+      "quote": "Handritsstyrkir fyrir leiknar kvikmyndir eru yfirleitt veittir í þremur hlutum eftir framvindu verkefnis. Fyrsti hluti kr. 500.000, annar hluti kr. 900.000 og þriðji hluti kr. 1.200.000.",
+      "source": "src.uthlutanir_2021_pdf", "source_line": 405, "confidence": "verified"
+    },
+    {
+      "family": "handrit", "format_track": "leikin_kvikmynd", "year": 2022,
+      "structure": "3 hlutar eftir framvindu", "parts": [500000, 900000, 1200000], "total": 2600000,
+      "quote": "Handritsstyrkir fyrir leiknar kvikmyndir eru yfirleitt veittir í þremur hlutum eftir framvindu verkefnis. Fyrsti hluti kr. 500.000, annar hluti kr. 900.000 og þriðji hluti kr. 1.200.000.",
+      "source": "src.uthlutanir_2022_pdf", "source_line": 438, "confidence": "verified"
+    },
+    {
+      "family": "handrit", "format_track": "leikin_kvikmynd", "year": 2023,
+      "structure": "3 hlutar eftir framvindu", "parts": [600000, 1000000, 1400000], "total": 3000000,
+      "quote": "Handritsstyrkir fyrir leiknar kvikmyndir eru yfirleitt veittir í þremur hlutum eftir framvindu verkefnis. Fyrsti hluti kr. 600.000, annar hluti kr. 1.000.000 og þriðji hluti kr. 1.400.000.",
+      "source": "src.uthlutanir_2023_pdf", "source_line": 448, "confidence": "verified"
+    },
+
+    {
+      "family": "handrit", "format_track": "leikid_sjonvarp", "year": 2021,
+      "structure": "allt að 3 hlutar eftir lengd og umfangi", "parts": [500000, 1200000, 900000], "total": 2600000,
+      "quote": "Handritsstyrkir vegna leikins sjónvarpsefnis eru veittir í allt að þremur hlutum eftir lengd og umfangi verkefna. Fyrsti hluti kr. 500.000, annar hluti kr. 1.200.000 og þriðji hluti kr. 900.000.",
+      "source": "src.uthlutanir_2021_pdf", "source_line": 564, "confidence": "verified"
+    },
+    {
+      "family": "handrit", "format_track": "leikid_sjonvarp", "year": 2022,
+      "structure": "allt að 3 hlutar eftir lengd og umfangi", "parts": [500000, 1200000, 900000], "total": 2600000,
+      "quote": "Handritsstyrkir vegna leikins sjónvarpsefnis eru veittir í allt að þremur hlutum eftir lengd og umfangi verkefna. Fyrsti hluti kr. 500.000, annar hluti kr. 1.200.000 og þriðji hluti kr. 900.000.",
+      "source": "src.uthlutanir_2022_pdf", "source_line": 614, "confidence": "verified"
+    },
+    {
+      "family": "handrit", "format_track": "leikid_sjonvarp", "year": 2023,
+      "structure": "allt að 3 hlutar eftir lengd og umfangi", "parts": [600000, 1400000, 1000000], "total": 3000000,
+      "quote": "Handritsstyrkir vegna leikins sjónvarpsefnis eru veittir í allt að þremur hlutum eftir lengd og umfangi verkefna. Fyrsti hluti kr. 600.000, annar hluti kr. 1.400.000 og þriðji hluti kr. 1.000.000.",
+      "source": "src.uthlutanir_2023_pdf", "source_line": 589, "confidence": "verified"
+    },
+    {
+      "family": "handrit", "format_track": "leikid_sjonvarp", "year": 2024,
+      "structure": "allt að 3 hlutar eftir lengd og umfangi", "parts": [600000, 1400000, 1000000], "total": 3000000,
+      "quote": "Handritsstyrkir vegna leikins sjónvarpsefnis eru veittir í allt að þremur hlutum eftir lengd og umfangi verkefna. Fyrsti hluti kr. 600.000, annar hluti kr. 1.400.000 og þriðji hluti kr. 1.000.000.",
+      "source": "src.uthlutanir_2024_pdf", "source_line": 546, "confidence": "verified"
+    },
+
+    {
+      "family": "handrit", "format_track": "heimildamynd", "year": 2021,
+      "structure": "1 þrep", "parts": [500000], "total": 500000,
+      "quote": "Handritsstyrkur er veittur í einu þrepi ... Upphæð styrks er allt að kr. 500.000.",
+      "source": "src.uthlutanir_2021_pdf", "source_line": 690, "confidence": "verified"
+    },
+    {
+      "family": "handrit", "format_track": "heimildamynd", "year": 2022,
+      "structure": "1 þrep", "parts": [500000], "total": 500000,
+      "quote": "Handritsstyrkur er veittur í einu þrepi ... Upphæð styrks er allt að kr. 500.000.",
+      "source": "src.uthlutanir_2022_pdf", "source_line": 772, "confidence": "verified"
+    },
+    {
+      "family": "handrit", "format_track": "heimildamynd", "year": 2023,
+      "structure": "1 þrep", "parts": [600000], "total": 600000,
+      "quote": "Handritsstyrkur er veittur í einu þrepi ... Upphæð styrks er allt að kr. 600.000.",
+      "source": "src.uthlutanir_2023_pdf", "source_line": 720, "confidence": "verified"
+    },
+    {
+      "family": "handrit", "format_track": "heimildamynd", "year": 2024,
+      "structure": "1 þrep", "parts": [600000], "total": 600000,
+      "quote": "Handritsstyrkur er veittur í einu þrepi ... Upphæð styrks er allt að kr. 600.000.",
+      "source": "src.uthlutanir_2024_pdf", "source_line": 683, "confidence": "verified"
+    },
+
+    {
+      "family": "throun", "format_track": "leikin_kvikmynd", "year": 2021,
+      "structure": "allt að 2 hlutar", "parts": [2500000, 3500000], "total": 6000000,
+      "quote": "Þróunarstyrkir vegna leikinna kvikmynda eru veittir í allt að tveimur hlutum. Fyrri hluti er allt að 2.500.000 og sá síðari er allt að 3.500.000.",
+      "source": "src.uthlutanir_2021_pdf", "source_line": 280, "confidence": "verified"
+    },
+    {
+      "family": "throun", "format_track": "leikin_kvikmynd", "year": 2022,
+      "structure": "allt að 2 hlutar", "parts": [2500000, 3500000], "total": 6000000,
+      "quote": "Þróunarstyrkir vegna leikinna kvikmynda eru veittir í allt að tveimur hlutum. Fyrri hluti er allt að 2.500.000 og sá síðari er allt að 3.500.000.",
+      "source": "src.uthlutanir_2022_pdf", "source_line": 282, "confidence": "verified"
+    },
+    {
+      "family": "throun", "format_track": "leikin_kvikmynd", "year": 2023,
+      "structure": "allt að 2 hlutar", "parts": [2500000, 3500000], "total": 6000000,
+      "quote": "Þróunarstyrkir vegna leikinna kvikmynda eru veittir í allt að tveimur hlutum. Fyrri hluti er allt að 2.500.000 og sá síðari er allt að 3.500.000.",
+      "source": "src.uthlutanir_2023_pdf", "source_line": 254, "confidence": "verified"
+    },
+
+    {
+      "family": "throun", "format_track": "leikid_sjonvarp", "year": 2021,
+      "structure": "allt að 2 hlutar", "parts": [2500000, 3500000], "total": 6000000,
+      "quote": "Þróunarstyrkir vegna leikins sjónvarpsefnis eru veittir í allt að tveimur hlutum. Fyrri hluti er allt að 2.500.000 og sá síðari er allt að 3.500.000.",
+      "source": "src.uthlutanir_2021_pdf", "source_line": 306, "confidence": "verified"
+    },
+    {
+      "family": "throun", "format_track": "leikid_sjonvarp", "year": 2022,
+      "structure": "allt að 2 hlutar", "parts": [2500000, 3500000], "total": 6000000,
+      "quote": "Þróunarstyrkir vegna leikins sjónvarpsefnis eru veittir í allt að tveimur hlutum. Fyrri hluti er allt að 2.500.000 og sá síðari er allt að 3.500.000.",
+      "source": "src.uthlutanir_2022_pdf", "source_line": 339, "confidence": "verified"
+    },
+    {
+      "family": "throun", "format_track": "leikid_sjonvarp", "year": 2023,
+      "structure": "allt að 2 hlutar", "parts": [2500000, 3500000], "total": 6000000,
+      "quote": "Þróunarstyrkir vegna leikins sjónvarpsefnis eru veittir í allt að tveimur hlutum. Fyrri hluti er allt að 2.500.000 og sá síðari er allt að 3.500.000.",
+      "source": "src.uthlutanir_2023_pdf", "source_line": 313, "confidence": "verified"
+    },
+
+    {
+      "family": "throun", "format_track": "heimildamynd", "year": 2021, "stage_note": "frekari þróun (stig II)",
+      "structure": "frekari þróun", "parts": [5000000], "total": 5000000,
+      "quote": "Þróunarstyrkur til frekari þróunar á heimildamynd er allt að kr. 5.000.000.",
+      "source": "src.uthlutanir_2021_pdf", "source_line": 320, "confidence": "verified"
+    },
+    {
+      "family": "throun", "format_track": "heimildamynd", "year": 2022, "stage_note": "frekari þróun (stig II)",
+      "structure": "frekari þróun", "parts": [5000000], "total": 5000000,
+      "quote": "Þróunarstyrkur til frekari þróunar á heimildamynd er allt að kr. 5.000.000.",
+      "source": "src.uthlutanir_2022_pdf", "source_line": 363, "confidence": "verified"
+    },
+    {
+      "family": "throun", "format_track": "heimildamynd", "year": 2023, "stage_note": "frekari þróun (stig II)",
+      "structure": "frekari þróun", "parts": [5000000], "total": 5000000,
+      "quote": "Þróunarstyrkur til frekari þróunar á heimildamynd er allt að kr. 5.000.000.",
+      "source": "src.uthlutanir_2023_pdf", "source_line": 337, "confidence": "verified"
+    }
+  ],
+  "_meta": {"sources": ["src.uthlutanir_2021_pdf", "src.uthlutanir_2022_pdf", "src.uthlutanir_2023_pdf", "src.uthlutanir_2024_pdf"], "confidence": "verified", "checked_at": "2026-06-19"}
+}

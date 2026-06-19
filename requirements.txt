@@ -1,4 +1,4 @@
+# Dashboard deps (the .venv used by `make run`). The core pipeline (compile/packs/ingest) is
+# stdlib-only; RAG lives in .venv-rag and the IMDb enricher in .venv-imdb (see Makefile).
 streamlit>=1.35.0
 pandas>=2.2.0
-pydantic>=2.7.0
-pytest>=8.0.0

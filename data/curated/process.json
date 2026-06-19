@@ -1,0 +1,51 @@
+{
+  "_about": "Contract/award process after a grant decision (samningsferli) + final delivery (lokaskil) + film-archive deposit obligation (skilaskylda).",
+  "contract_process": {
+    "id": "samningsferli",
+    "name_is": "Samningsferli styrks",
+    "stages": [
+      {
+        "order": 1, "id": "vilyrdisbref", "name_is": "Vilyrðisbréf",
+        "condition": "Grunnupplýsingar um mynd og helstu aðstandendur þurfa að liggja fyrir.",
+        "forms": [{"title": "Eyðublað vegna útgáfu á vilyrðisbréfi", "format": "docx", "url": "https://kmi.payload.is/api/media/file/Eydublad_vegna_utgafu_a_vilyrdisbrefi2.docx"}]
+      },
+      {
+        "order": 2, "id": "uthlutunarsamningur", "name_is": "Úthlutunarsamningur",
+        "condition": "Frekari upplýsingar um verkefnið, staðfesting á fjármögnun og önnur gögn skv. kröfum framleiðsludeildar KMÍ.",
+        "forms": [
+          {"title": "Skilyrði fyrir greiðslu styrks", "format": "pdf", "url": "https://kmi.payload.is/api/media/file/Skilyrdi-fyrir-greidslu-styrks.pdf"},
+          {"title": "Kynningarefni fyrir úthlutunarsamning", "format": "docx", "url": "https://kmi.payload.is/api/media/file/skil-kynningarefnis-fyrir-uthlutunarsamning.docx"},
+          {"title": "Eyðublað fyrir listrænar lykilstöður eftir kyni", "format": "xls", "url": "https://kmi.payload.is/api/media/file/Kyn_lykilstodur2025.xls"}
+        ]
+      },
+      {
+        "order": 3, "id": "lokaskil_kmi", "name_is": "Lokaskil til KMÍ",
+        "deadline_months": 6,
+        "regulation_ref": "13. gr. reglugerðar um Kvikmyndasjóð nr. 229/2003",
+        "submit_email": "umsoknir@kvikmyndamidstod.is",
+        "checklist": [
+          {"title": "Kostnaðaruppgjör", "description": "Samanburður á samþykktri kostnaðaráætlun og raunkostnaði."},
+          {"title": "Hreyfingalisti", "description": "Útdráttur úr bókhaldskerfi sem sýnir allar raunfærslur á bak við hvern kostnaðarlið."},
+          {"title": "Endanlegt fjármögnunaryfirlit", "description": "Staðfesting á öllum tekjustreymum og styrkjum."},
+          {"title": "Endurheimtaráætlun", "description": "Endanlegt yfirlit yfir eigna- og tekjuskiptingu."},
+          {"title": "Kynningarefni", "description": "Samkvæmt formi frá KMÍ."},
+          {"title": "Kynjahlutföll", "description": "Uppfærðar upplýsingar um lykilstöður."},
+          {"title": "Sjálfbærniskýrsla", "description": "Skýrsla um umhverfisspor / græna framleiðsluhætti."},
+          {"title": "Kvittun frá Kvikmyndasafni Íslands", "description": "Staðfesting á því að sýningarefni og varðveislugögnum hafi verið skilað."}
+        ]
+      }
+    ],
+    "_meta": {"sources": ["src.manual_curation", "src.kmi_skil_framleidslustyrkir", "src.reglugerd_229_2003"], "confidence": "needs_verification", "checked_at": "2026-06-19"}
+  },
+  "film_archive_deposit": {
+    "id": "kvikmyndasafn_skilaskylda",
+    "name_is": "Skilaskylda til Kvikmyndasafns Íslands",
+    "links": {
+      "kvikmynd_i_fullri_lengd": "https://kvikmyndasafn.is/skilaskylda/kvikmynd-i-fullri-lengd/",
+      "heimildarmynd": "https://kvikmyndasafn.is/skilaskylda/heimildarmynd/",
+      "sjonvarpsefni": "https://kvikmyndasafn.is/skilaskylda/sjonvarpsefni/",
+      "stuttmynd": "https://kvikmyndasafn.is/skilaskylda/stuttmynd/"
+    },
+    "_meta": {"sources": ["src.kvikmyndasafn_skilaskylda", "src.manual_curation"], "confidence": "needs_verification", "checked_at": "2026-06-19"}
+  }
+}

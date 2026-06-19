@@ -1,161 +1,315 @@
+"""KMÍ Intelligence — producer dashboard over the v2 knowledge base (build/kmi.db).
+
+Run:  make run        (uses .venv/bin/streamlit)
+  or  .venv/bin/streamlit run app/streamlit_app.py
+
+Read-only over build/kmi.db. The semantic-search page shells out to the local RAG
+backend in .venv-rag (falls back to keyword search if that venv is absent).
+"""
 from __future__ import annotations
 
+import json
+import os
 import sqlite3
+import subprocess
+from pathlib import Path
+
 import pandas as pd
 import streamlit as st
 
-from src.kmi_intelligence.db import get_connection, create_schema
-from src.kmi_intelligence.seed import load_seed_data
-from src.kmi_intelligence.readiness import compute_readiness, stage_mismatch_flags
-from src.kmi_intelligence.analysis import allocation_summary
-from src.kmi_intelligence.prompt_builder import build_prompt
+ROOT = Path(__file__).resolve().parents[1]
+DB = ROOT / "build" / "kmi.db"
+RAG_PY = ROOT / ".venv-rag" / "bin" / "python"
+
+st.set_page_config(page_title="KMÍ Intelligence", layout="wide")
+
+if not DB.exists():
+    st.error("build/kmi.db not found. Run `make build` first (and `make parse` for the ledger).")
+    st.stop()
 
 
-@st.cache_resource
-def init_db() -> sqlite3.Connection:
-    conn = get_connection()
-    create_schema(conn)
-    return conn
+@st.cache_data
+def q(sql: str, params: tuple = ()) -> pd.DataFrame:
+    with sqlite3.connect(DB) as c:
+        return pd.read_sql_query(sql, c, params=params)
 
 
-def read_table(conn: sqlite3.Connection, table: str) -> pd.DataFrame:
-    return pd.read_sql_query(f"SELECT * FROM {table}", conn)
+def isk(n) -> str:
+    return "—" if n is None or pd.isna(n) else f"{int(n):,}".replace(",", ".") + " kr."
 
 
-st.set_page_config(page_title="KMI Intelligence MVP", layout="wide")
-st.title("KMÍ Intelligence — Producer Dashboard (Local MVP)")
+FAMILY_LABEL = {
+    "handrit": "Handrit (screenwriting)", "throun": "Þróun (development)",
+    "framleidsla": "Framleiðsla (production)", "eftirvinnsla": "Eftirvinnsla (post)",
+    "endurgreidsla": "Endurgreiðsla (rebate)", "annad": "Aðrir (other)",
+}
 
-conn = init_db()
+st.sidebar.title("KMÍ Intelligence")
+page = st.sidebar.radio("Page", [
+    "📊 Overview", "🎬 Grant browser", "📋 Document matrix",
+    "💰 Funding explorer", "🎞️ Productions ↔ funding", "🧑‍🎬 People & companies",
+    "📐 Amounts & rebate", "🔎 Semantic search",
+])
+st.sidebar.caption("Read-only over `build/kmi.db`. Rebuild with `make all`.")
 
-with st.sidebar:
-    st.header("Navigation")
-    page = st.radio("Page", [
-        "Home", "Grant Browser", "Document Matrix", "Allocation Explorer", "Project Readiness Checker", "AI Brief Builder"
-    ])
-    if st.button("Reload seed data"):
-        load_seed_data(conn)
-        st.success("Seed data reloaded.")
 
-if page == "Home":
-    st.write("Local-first grant intelligence tool for Icelandic film producers. This MVP uses sample data and heuristics.")
-    cols = st.columns(4)
-    cols[0].metric("Grants", len(read_table(conn, "grants")))
-    cols[1].metric("Documents", len(read_table(conn, "documents")))
-    cols[2].metric("Allocations", len(read_table(conn, "allocations")))
-    cols[3].metric("Projects", len(read_table(conn, "projects")))
+# ───────────────────────── Overview ─────────────────────────
+if page == "📊 Overview":
+    st.title("KMÍ Intelligence — producer dashboard")
+    st.caption("Source-traceable knowledge base of what KMÍ offers and has funded (2021–2024).")
+    n_streams = q("SELECT COUNT(*) n FROM grant_streams")["n"][0]
+    n_docs = q("SELECT COUNT(*) n FROM stream_documents")["n"][0]
+    n_alloc = q("SELECT COUNT(*) n FROM allocations")["n"][0]
+    total = q("SELECT SUM(amount_isk) s FROM allocations WHERE amount_isk IS NOT NULL")["s"][0]
+    c = st.columns(4)
+    c[0].metric("Grant streams (gáttir)", n_streams)
+    c[1].metric("Document requirements", n_docs)
+    c[2].metric("Awards 2021–2024", n_alloc)
+    c[3].metric("Total disbursed", isk(total))
 
-elif page == "Grant Browser":
-    grants = read_table(conn, "grants")
-    selected_id = st.selectbox("Select grant", grants["id"], format_func=lambda i: grants.loc[grants["id"] == i, "name_is"].iloc[0])
-    g = grants[grants["id"] == selected_id].iloc[0]
-    st.subheader(g["name_is"])
-    st.write({k: g[k] for k in ["purpose", "category", "best_stage", "eligibility_summary", "last_checked", "confidence"]})
+    st.subheader("Disbursed by year")
+    by_year = q("SELECT year, SUM(amount_isk) total FROM allocations WHERE amount_isk IS NOT NULL GROUP BY year ORDER BY year")
+    st.bar_chart(by_year, x="year", y="total")
 
-    req = pd.read_sql_query(
-        """SELECT gdr.requirement_level, d.name_is FROM grant_document_requirements gdr
-           JOIN documents d ON d.id = gdr.document_id WHERE gdr.grant_id = ?""", conn, params=(selected_id,)
-    )
-    st.markdown("### Documents")
-    st.dataframe(req)
+    st.info("**Amounts:** the *application maximum* (per gátta) and the *disbursement parts* "
+            "(how awards are paid out) are different numbers — see the **Amounts & rebate** page. "
+            "Most catalog facts are `needs_verification`; ledger figures come from the official úthlutanir PDFs.")
 
-    crit = pd.read_sql_query(
-        """SELECT c.name, c.axis, c.description FROM grant_criteria gc
-           JOIN criteria c ON c.id = gc.criterion_id WHERE gc.grant_id = ?""", conn, params=(selected_id,)
-    )
-    st.markdown("### Criteria")
-    st.dataframe(crit)
 
-elif page == "Document Matrix":
-    q = """SELECT g.category, g.name_is as grant_name, d.name_is as document_name, gdr.requirement_level
-           FROM grant_document_requirements gdr
-           JOIN grants g ON g.id = gdr.grant_id
-           JOIN documents d ON d.id = gdr.document_id"""
-    df = pd.read_sql_query(q, conn)
+# ───────────────────────── Grant browser ─────────────────────────
+elif page == "🎬 Grant browser":
+    st.title("Grant browser")
+    fams = q("SELECT id, name_is FROM grant_families ORDER BY id")
+    fam = st.selectbox("Family", fams["id"], format_func=lambda i: FAMILY_LABEL.get(i, i))
+    streams = q("SELECT * FROM grant_streams WHERE family=? ORDER BY stage, level", (fam,))
+    if streams.empty:
+        st.warning("No streams in this family yet.")
+        st.stop()
+    sid = st.selectbox("Stream (gátta)", streams["id"],
+                       format_func=lambda i: streams.loc[streams["id"] == i, "name_is"].iloc[0])
+    s = streams[streams["id"] == sid].iloc[0]
+
+    st.subheader(s["name_is"])
+    if s["name_en"]:
+        st.caption(s["name_en"])
+    c = st.columns(3)
+    c[0].metric("Application max", isk(s["max_amount_isk"]) if s["max_amount_isk"] else "scope-dependent")
+    c[1].metric("Stage", s["stage"])
+    c[2].metric("Gátta ID", s["gatta_id"] or "—")
+    if s["purpose"]:
+        st.write("**Markmið:** " + s["purpose"])
+    if s["amount_basis"]:
+        st.caption("💡 " + s["amount_basis"])
+    if s["payment_split"]:
+        st.write("**Greiðsluskipting:** " + s["payment_split"])
+    if s["portal_url"]:
+        st.write(f"**Apply:** [{s['portal_url']}]({s['portal_url']})")
+    rules = json.loads(s["rules_json"] or "{}")
+    if rules:
+        st.write("**Skilyrði / rules:**")
+        for k_, v_ in rules.items():
+            st.write(f"- *{k_}*: {v_}")
+
+    st.markdown("#### Documents (fylgigögn)")
+    docs = q("SELECT requirement_level, document_text FROM stream_documents WHERE stream_id=? ORDER BY rowid", (sid,))
+    for lvl in ["required", "newcomer", "recommended", "strategic", "optional"]:
+        d = docs[docs["requirement_level"] == lvl]
+        if not d.empty:
+            st.write(f"**{lvl.capitalize()}:**")
+            for t in d["document_text"]:
+                st.write(f"- {t}")
+    st.caption(f"Confidence: `{s['confidence']}` · sources: {s['sources_json']}")
+
+
+# ───────────────────────── Document matrix ─────────────────────────
+elif page == "📋 Document matrix":
+    st.title("Document matrix")
+    df = q("""SELECT gs.family, gs.name_is AS stream, sd.requirement_level, sd.document_text
+              FROM stream_documents sd JOIN grant_streams gs ON gs.id = sd.stream_id""")
     c1, c2 = st.columns(2)
-    cat = c1.selectbox("Category", ["All"] + sorted(df["category"].dropna().unique().tolist()))
-    lvl = c2.selectbox("Requirement level", ["All", "required", "recommended", "strategic", "conditional", "not_applicable", "unknown"])
-    if cat != "All":
-        df = df[df["category"] == cat]
+    fam = c1.selectbox("Family", ["All"] + sorted(df["family"].unique()))
+    lvl = c2.selectbox("Requirement", ["All"] + sorted(df["requirement_level"].unique()))
+    if fam != "All":
+        df = df[df["family"] == fam]
     if lvl != "All":
         df = df[df["requirement_level"] == lvl]
-    st.dataframe(df)
+    st.caption(f"{len(df)} requirements")
+    st.dataframe(df, use_container_width=True, hide_index=True)
 
-elif page == "Allocation Explorer":
-    df = read_table(conn, "allocations")
-    c1, c2, c3, c4 = st.columns(4)
-    years = sorted(df["year"].dropna().astype(int).unique().tolist())
-    selected_years = c1.multiselect("Years", years, default=years)
-    cats = sorted(df["grant_category_raw"].dropna().unique().tolist())
-    selected_cats = c2.multiselect("Categories", cats, default=cats)
-    companies = sorted(df["company_name"].dropna().unique().tolist())
-    selected_companies = c3.multiselect("Companies", companies, default=companies)
-    min_amt, max_amt = int(df["amount_isk"].min()), int(df["amount_isk"].max())
-    amt_range = c4.slider("Amount range", min_amt, max_amt, (min_amt, max_amt))
 
-    filt = df[df["year"].isin(selected_years) & df["grant_category_raw"].isin(selected_cats) & df["company_name"].isin(selected_companies)]
-    filt = filt[(filt["amount_isk"] >= amt_range[0]) & (filt["amount_isk"] <= amt_range[1])]
-    st.dataframe(filt)
+# ───────────────────────── Funding explorer ─────────────────────────
+elif page == "💰 Funding explorer":
+    st.title("Funding explorer — úthlutanir 2021–2024")
+    df = q("SELECT * FROM allocations")
+    c1, c2, c3 = st.columns(3)
+    years = sorted(df["year"].dropna().astype(int).unique())
+    ysel = c1.multiselect("Years", years, default=years)
+    fams = sorted(df["family"].dropna().unique())
+    fsel = c2.multiselect("Family", fams, default=fams)
+    comp = c3.text_input("Company contains", "")
 
-    summary = allocation_summary(filt)
-    st.metric("Total amount", f"{summary['total']:,} ISK")
-    st.metric("Average amount", f"{summary['avg']:,.0f} ISK")
-    st.metric("Median amount", f"{summary['median']:,.0f} ISK")
-    st.write("Count by grant category")
-    st.dataframe(filt.groupby("grant_category_raw").size().rename("count"))
-    st.write("Top companies by total amount")
-    st.dataframe(summary["top_companies"].rename("total_isk"))
+    f = df[df["year"].isin(ysel) & df["family"].isin(fsel)]
+    if comp:
+        f = f[f["company"].fillna("").str.contains(comp, case=False)]
 
-elif page == "Project Readiness Checker":
-    projects = read_table(conn, "projects")
-    grants = read_table(conn, "grants")
-    pid = st.selectbox("Project", projects["id"], format_func=lambda i: projects.loc[projects["id"] == i, "title"].iloc[0])
-    gid = st.selectbox("Target grant", grants["id"], format_func=lambda i: grants.loc[grants["id"] == i, "name_is"].iloc[0])
+    paid = f[f["amount_isk"].notna()]
+    m = st.columns(3)
+    m[0].metric("Awards", len(f))
+    m[1].metric("Total grant", isk(paid["amount_isk"].sum()))
+    m[2].metric("Median grant", isk(paid["amount_isk"].median()) if not paid.empty else "—")
 
-    req = pd.read_sql_query(
-        """SELECT gdr.document_id, gdr.requirement_level, d.name_is FROM grant_document_requirements gdr
-           JOIN documents d ON d.id = gdr.document_id WHERE gdr.grant_id = ?""", conn, params=(gid,)
+    st.subheader("By family")
+    st.bar_chart(paid.groupby("family")["amount_isk"].sum())
+    st.subheader("Top companies")
+    top = paid.groupby("company")["amount_isk"].sum().sort_values(ascending=False).head(15)
+    st.bar_chart(top)
+
+    st.subheader("Awards")
+    st.dataframe(
+        f[["year", "project_title", "family", "company", "director", "amount_isk", "commitment_isk", "confidence"]]
+        .sort_values("amount_isk", ascending=False),
+        use_container_width=True, hide_index=True,
     )
-    pdocs = pd.read_sql_query("SELECT * FROM project_documents WHERE project_id = ?", conn, params=(pid,))
-    result = compute_readiness(req, pdocs)
-    st.metric("Readiness score (heuristic)", f"{result['score']}%")
-    st.caption("Heuristic only. Not an official KMÍ evaluation model.")
 
-    st.write("Missing required", result["missing"]["required"])
-    st.write("Missing recommended", result["missing"]["recommended"])
-    st.write("Missing strategic", result["missing"]["strategic"])
 
-    p = projects[projects["id"] == pid].iloc[0]
-    g = grants[grants["id"] == gid].iloc[0]
-    flags = stage_mismatch_flags(str(p["stage"]), str(g["best_stage"]))
-    if flags:
-        st.warning("\n".join(flags))
+# ───────────────────────── People & companies ─────────────────────────
+elif page == "🧑‍🎬 People & companies":
+    st.title("People & companies")
+    st.caption("Entity spine built from the úthlutanir ledger + production catalogs + the SÍK "
+               "registry. Name-based resolution; same-name people may merge.")
+    kind = st.radio("Look up a", ["Person", "Company"], horizontal=True)
+    if kind == "Person":
+        name = st.text_input("Person name", "Hlynur Pálmason")
+        p = q("SELECT * FROM person WHERE display_name LIKE ? ORDER BY credit_count DESC LIMIT 1", (f"%{name}%",))
+        if p.empty:
+            st.info("No match.")
+        else:
+            p = p.iloc[0]
+            st.subheader(f"{p['display_name']}")
+            st.caption(f"Roles: {p['primary_roles']} · {p['credit_count']} credits")
+            st.markdown("**Filmography**")
+            st.dataframe(q("""SELECT t.year, t.title, tc.role, t.kind, t.kmi_funded
+                              FROM title_credit tc JOIN title t ON t.id=tc.title_id
+                              WHERE tc.person_id=? ORDER BY t.year DESC, t.title""", (int(p["id"]),)),
+                         use_container_width=True, hide_index=True)
+            st.markdown("**Frequent collaborators**")
+            st.dataframe(q("""SELECT p2.display_name AS collaborator, COUNT(*) AS together
+                              FROM title_credit c1 JOIN title_credit c2 ON c1.title_id=c2.title_id AND c1.person_id<>c2.person_id
+                              JOIN person p2 ON p2.id=c2.person_id WHERE c1.person_id=?
+                              GROUP BY c2.person_id ORDER BY together DESC LIMIT 10""", (int(p["id"]),)),
+                         use_container_width=True, hide_index=True)
+    else:
+        name = st.text_input("Company name", "Glassriver")
+        co = q("SELECT * FROM company WHERE name LIKE ? ORDER BY kmi_total_isk DESC LIMIT 1", (f"%{name}%",))
+        if co.empty:
+            st.info("No match.")
+        else:
+            co = co.iloc[0]
+            st.subheader(co["name"])
+            st.caption(f"{'SÍK member · ' if co['is_sik_member'] else ''}{co['website'] or ''}  ·  "
+                       f"{co['kmi_grants_count']} grants / {isk(co['kmi_total_isk'])}")
+            raws = q("SELECT raw_string FROM alias WHERE entity_type='company' AND entity_id=? AND status='resolved'", (int(co["id"]),))
+            if not raws.empty:
+                ph = ",".join("?" * len(raws))
+                st.markdown("**Funded projects**")
+                st.dataframe(q(f"""SELECT DISTINCT year, project_title, amount_isk, family FROM allocations
+                                   WHERE company IN ({ph}) AND amount_isk IS NOT NULL ORDER BY year DESC, amount_isk DESC""",
+                               tuple(raws["raw_string"])), use_container_width=True, hide_index=True)
+            mc = q("SELECT DISTINCT raw_string FROM alias WHERE entity_type='company' AND entity_id=? AND status='unresolved'", (int(co["id"]),))
+            if not mc.empty:
+                st.markdown("**Merge candidates (parked for review)**")
+                st.write(", ".join(mc["raw_string"]))
 
-elif page == "AI Brief Builder":
-    modes = ["Grant fit analysis", "Document checklist", "Brutal consultant review", "Application rewrite", "Allocation pattern analysis"]
-    mode = st.selectbox("Prompt mode", modes)
-    projects = read_table(conn, "projects")
-    grants = read_table(conn, "grants")
-    pid = st.selectbox("Project", projects["id"], format_func=lambda i: projects.loc[projects["id"] == i, "title"].iloc[0])
-    gid = st.selectbox("Grant", grants["id"], format_func=lambda i: grants.loc[grants["id"] == i, "name_is"].iloc[0])
+# ───────────────────────── Amounts & rebate ─────────────────────────
+elif page == "📐 Amounts & rebate":
+    st.title("Amounts & rebate")
+    st.info("**Application maximum** (what you can request, from the live styrkir pages) is on each "
+            "grant stream. **Disbursement parts** below (how awards were paid out by progress) come "
+            "from the úthlutanir PDFs — they are *different numbers*.")
 
-    req = pd.read_sql_query(
-        """SELECT gdr.document_id, gdr.requirement_level, d.name_is FROM grant_document_requirements gdr
-           JOIN documents d ON d.id = gdr.document_id WHERE gdr.grant_id = ?""", conn, params=(gid,)
-    )
-    pdocs = pd.read_sql_query("SELECT * FROM project_documents WHERE project_id = ?", conn, params=(pid,))
-    readiness = compute_readiness(req, pdocs)
+    st.subheader("Application maxima (per gátta)")
+    st.dataframe(q("""SELECT gatta_id, name_is, family,
+                        CASE WHEN max_amount_isk IS NULL THEN 'scope-dependent' ELSE max_amount_isk END AS max_isk,
+                        amount_basis FROM grant_streams
+                      WHERE family IN ('handrit','throun','eftirvinnsla') ORDER BY format_track, stage, level"""),
+                 use_container_width=True, hide_index=True)
 
-    docs = {
-        "required": req[req["requirement_level"] == "required"]["name_is"].tolist(),
-        "recommended": req[req["requirement_level"] == "recommended"]["name_is"].tolist(),
-        "strategic": req[req["requirement_level"] == "strategic"]["name_is"].tolist(),
-        "missing_required": readiness["missing"]["required"],
-        "missing_recommended": readiness["missing"]["recommended"],
-        "missing_strategic": readiness["missing"]["strategic"],
-    }
-    crit = pd.read_sql_query("""SELECT c.name, c.description FROM grant_criteria gc JOIN criteria c ON c.id = gc.criterion_id WHERE gc.grant_id = ?""", conn, params=(gid,))
-    crit_lines = [f"{r['name']}: {r['description']}" for _, r in crit.iterrows()]
-    alloc = read_table(conn, "allocations")
-    alloc_note = f"Sample records: {len(alloc)}. Total ISK: {int(alloc['amount_isk'].sum()):,}."
-    prompt = build_prompt(mode, projects[projects['id'] == pid].iloc[0].to_dict(), grants[grants['id'] == gid].iloc[0].to_dict(), docs, crit_lines, alloc_note)
-    st.text_area("Copyable prompt", prompt, height=400)
+    st.subheader("Disbursement history (verbatim from PDFs)")
+    st.dataframe(q("SELECT family, format_track, year, structure, parts_json, total_isk, source_line FROM grant_amounts ORDER BY family, format_track, year"),
+                 use_container_width=True, hide_index=True)
+
+    st.subheader("Endurgreiðsla (rebate)")
+    r = q("SELECT * FROM rebate").iloc[0]
+    st.write(f"- **{r['general_pct']}%** general — {r['general_basis']}")
+    st.write(f"- **{r['enhanced_pct']}%** enhanced — {r['enhanced_conditions']}")
+    st.caption(r["regla_18_manuda"])
+
+    st.subheader("Application & delivery process")
+    st.dataframe(q("SELECT ord, name_is, condition, deadline_months FROM process_stages ORDER BY ord"),
+                 use_container_width=True, hide_index=True)
+
+
+# ───────────────────────── Productions ↔ funding ─────────────────────────
+elif page == "🎞️ Productions ↔ funding":
+    st.title("Productions ↔ KMÍ funding")
+    st.caption("Icelandic films (Wikipedia) + series (kvikmyndir.is), cross-referenced with the "
+               "KMÍ ledger by title + year.")
+    st.info("**Coverage:** our grant ledger is only **2021–2024**. `matched` = a grant was found; "
+            "`likely_unfunded` = released 2022+ with no match (the real 'made without a grant' "
+            "signal); `ledger_gap` = older release whose grant era we don't have. Title-based "
+            "matching can miss grants given under a working title.")
+    try:
+        df = q("SELECT * FROM title WHERE source IN ('src.kvikmyndir_is','src.wikipedia_is')")
+    except Exception:
+        df = None
+    if df is None or df.empty:
+        st.warning("No productions yet — run `make kvik && make wiki-films && make build`.")
+    else:
+        m = st.columns(4)
+        m[0].metric("Titles", len(df))
+        m[1].metric("Matched to a grant", int((df["xref_status"] == "matched").sum()))
+        m[2].metric("Likely unfunded (2022+)", int((df["xref_status"] == "likely_unfunded").sum()))
+        m[3].metric("Ledger gap (pre-2021)", int((df["xref_status"] == "ledger_gap").sum()))
+        c1, c2, c3 = st.columns(3)
+        kind = c1.selectbox("Kind", ["All", "film", "series"])
+        status = c2.selectbox("Cross-ref status", ["All", "matched", "likely_unfunded", "ledger_gap"])
+        yr = c3.slider("From year", 1949, 2026, 2015)
+        f = df[df["year"].fillna(0) >= yr]
+        if kind != "All":
+            f = f[f["kind"] == kind]
+        if status != "All":
+            f = f[f["xref_status"] == status]
+        f = f.sort_values(["year", "title"], ascending=[False, True])
+        show = f[["title", "year", "kind", "director", "xref_status", "kmi_total_isk", "kmi_years_json", "match_confidence"]]
+        st.dataframe(show, use_container_width=True, hide_index=True)
+
+# ───────────────────────── Semantic search ─────────────────────────
+elif page == "🔎 Semantic search":
+    st.title("Semantic search (RAG)")
+    query = st.text_input("Ask in Icelandic or English", "þróunarstyrkur fyrir heimildamynd")
+    k = st.slider("Results", 3, 15, 5)
+    if st.button("Search") and query:
+        if RAG_PY.exists():
+            with st.spinner("Embedding query with multilingual-e5…"):
+                out = subprocess.run(
+                    [str(RAG_PY), "-m", "kmi_intelligence.rag", "search", query,
+                     "--backend", "local", "-k", str(k), "--json"],
+                    cwd=ROOT, env={**os.environ, "PYTHONPATH": "src"},
+                    capture_output=True, text=True, timeout=180,
+                )
+            lines = [l for l in out.stdout.splitlines() if l.strip().startswith("[")]
+            if lines:
+                res = pd.DataFrame(json.loads(lines[-1]))
+                st.dataframe(res[["score", "type", "text"]], use_container_width=True, hide_index=True)
+            else:
+                st.error("Search failed.")
+                st.code(out.stderr[-1000:] or out.stdout[-1000:])
+        else:
+            st.warning("Local RAG venv (.venv-rag) not found — run `make embed-setup && make embed`. "
+                       "Falling back to keyword search over chunks.")
+            chunks = ROOT / "build" / "embeddings" / "chunks.jsonl"
+            if chunks.exists():
+                rows = [json.loads(x) for x in chunks.read_text(encoding="utf-8").splitlines()]
+                hits = [r for r in rows if query.lower() in r["text"].lower()][:k]
+                st.dataframe(pd.DataFrame([{"type": r["metadata"].get("type"), "text": r["text"]} for r in hits]),
+                             use_container_width=True, hide_index=True)

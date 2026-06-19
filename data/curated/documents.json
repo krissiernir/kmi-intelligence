@@ -1,0 +1,217 @@
+{
+  "_about": "Canonical document-type specifications (fylgigögn). Each grant stream lists documents by name in grant_streams; at compile time those names are matched to these specs via `aliases`, so a stream's checklist becomes a full spec (purpose, what it must prove, format/page limit, file-naming convention, common weaknesses).",
+  "_meta": {"sources": ["src.manual_curation", "src.kmi_handrit_leiknar", "src.kmi_handrit_sjonvarp"], "confidence": "needs_verification", "checked_at": "2026-06-19"},
+  "documents": [
+    {
+      "doc_key": "cv", "name_is": "Ferilskrár höfunda/lykilaðila", "name_en": "CVs of key people",
+      "aliases": ["ferilskrá", "ferilskrar", "ferilskrár"],
+      "purpose": "Sýna reynslu og getu lykilaðila (höfundur, leikstjóri, framleiðandi).",
+      "what_it_must_prove": "Að teymið uppfylli reynslukröfur viðkomandi styrkstigs (sbr. skilgreiningu reynds höfundar/framleiðanda).",
+      "format_limit": "Hámark 2 blaðsíður á hvern lykilaðila; öfug tímaröð (nýjasta fyrst); ekki samfelldur texti.",
+      "naming_convention": "[HEITI_VERKEFNIS]_CV_[NAFN_LYKILADILA]_v1.pdf",
+      "common_weaknesses": "Of langar, almennar ferilskrár sem sýna ekki viðeigandi reynslu fyrir verkefnið."
+    },
+    {
+      "doc_key": "company_cert", "name_is": "Vottorð úr fyrirtækjaskrá", "name_en": "Company registry certificate",
+      "aliases": ["fyrirtækjaskrá", "vottorð úr fyrirtækjaskrá"],
+      "purpose": "Staðfesta lögaðila sem sækir um (ef sótt er um á kennitölu félags).",
+      "what_it_must_prove": "Að umsækjandi sé skráð, starfandi framleiðslufélag.",
+      "format_limit": "Nýlegt vottorð úr fyrirtækjaskrá.",
+      "naming_convention": "[HEITI_VERKEFNIS]_Fyrirtaekjaskra.pdf",
+      "common_weaknesses": "Úrelt vottorð eða rangur lögaðili."
+    },
+    {
+      "doc_key": "rights", "name_is": "Rétthafasamningar", "name_en": "Rights / option agreement (chain of title)",
+      "aliases": ["rétthafa", "option", "chain of title", "höfundasamning", "yfirfærslu réttinda"],
+      "purpose": "Staðfesta að umsækjandi hafi réttinn á sögunni/handritinu.",
+      "what_it_must_prove": "Undirritaður valréttarsamningur (Option) eða höfundasamningur; ef höfundur sækir einn, yfirlýsing um eignarhald á hugmynd. KMÍ samþykkir ekki umsóknir framleiðenda án skriflegs samþykkis höfundar.",
+      "format_limit": "Undirritað skjal.",
+      "naming_convention": "[HEITI_VERKEFNIS]_OptionAgreement_[NAFN_HOFUNDAR].pdf",
+      "common_weaknesses": "Óundirritaðir eða útrunnir samningar; óljós keðja réttinda (chain of title)."
+    },
+    {
+      "doc_key": "synopsis", "name_is": "Stuttur útdráttur (synopsis)", "name_en": "Short synopsis",
+      "aliases": ["stuttur útdráttur", "synopsis", "útdráttur (synopsis", "logline"],
+      "purpose": "Kynna verkið hnitmiðað.",
+      "what_it_must_prove": "Aðalpersónur, meginstef, ytri/innri átök og sögulok.",
+      "format_limit": "Á íslensku. Hámark 1 blaðsíða.",
+      "naming_convention": "[HEITI_VERKEFNIS]_Synopsis_IS_v1.pdf",
+      "common_weaknesses": "Of almennt; sögulok vantar; skrifað á ensku þegar íslensku er krafist."
+    },
+    {
+      "doc_key": "treatment", "name_is": "Sögulýsing (treatment)", "name_en": "Treatment",
+      "aliases": ["sögulýsing", "treatment", "meðferð"],
+      "purpose": "Sýna dramatíska uppbyggingu og framvindu sögunnar án samtala.",
+      "what_it_must_prove": "Persónulýsingar, dramatísk strúktúr (kynning, flækja, ris, lausn) og skýr framvinda senu fyrir senu.",
+      "format_limit": "12–30 blaðsíður (á við Stig I og I+II leikinna mynda).",
+      "naming_convention": "[HEITI_VERKEFNIS]_Sogulysning_v1.pdf",
+      "common_weaknesses": "Of stutt/yfirborðskennt; vantar dramatíska uppbyggingu; samtöl í stað frásagnar."
+    },
+    {
+      "doc_key": "scene_samples", "name_is": "Senudæmi", "name_en": "Scene samples",
+      "aliases": ["senudæmi"],
+      "purpose": "Sýna ritfærni nýliða.",
+      "what_it_must_prove": "Nákvæmlega 3 senur: tvær sýna myndræna sýn og stíl, ein sýnir getu til að skrifa flæðandi, raunveruleg samtöl.",
+      "format_limit": "Aðeins fyrir nýliða (Stig I). Nákvæmlega 3 senur.",
+      "naming_convention": "[HEITI_VERKEFNIS]_Senudaemi_v1.pdf",
+      "common_weaknesses": "Rangur fjöldi sena; senur sem sýna ekki bæði myndræna sýn og samtöl."
+    },
+    {
+      "doc_key": "writer_statement", "name_is": "Greinargerð handritshöfundar", "name_en": "Writer's statement",
+      "aliases": ["greinargerð handritshöfund", "greinargerð höfund", "greinargerð kvikmyndahöfund"],
+      "purpose": "Útskýra listræna sýn og stöðu verkefnis.",
+      "what_it_must_prove": "Persónuleg tenging við efnið, listræn markmið, þema og efnistök; hvar verkefnið stendur og áætluð næstu skref.",
+      "format_limit": "Engin föst lengd.",
+      "naming_convention": "[HEITI_VERKEFNIS]_GreinargerdHofundar_v1.pdf",
+      "common_weaknesses": "Endursögn söguþráðar í stað listrænnar sýnar; engin skýr næstu skref."
+    },
+    {
+      "doc_key": "producer_statement", "name_is": "Greinargerð framleiðanda", "name_en": "Producer's statement",
+      "aliases": ["greinargerð framleiðanda"],
+      "purpose": "Sýna framkvæmda- og markaðshlið verkefnis.",
+      "what_it_must_prove": "Hvers vegna verkefnið á erindi núna, hvernig það verður fjármagnað, áætlaður markhópur og dreifingarmöguleikar; (sjónvarp) áætlaður tökudagafjöldi og brúun frá handrits- að framleiðslustyrk.",
+      "format_limit": "Nauðsynleg fyrir nýliða í Stig II og í Stig III sjónvarps; valkvæð fyrir reynda í Stig I.",
+      "naming_convention": "[HEITI_VERKEFNIS]_GreinargerdFramleidanda_v1.pdf",
+      "common_weaknesses": "Óraunhæf fjármögnun (‚við auglýsum á Facebook‘); enginn skýr markhópur eða dreifileið."
+    },
+    {
+      "doc_key": "director_statement", "name_is": "Greinargerð leikstjóra", "name_en": "Director's statement",
+      "aliases": ["greinargerð leikstjóra"],
+      "purpose": "Sýna myndræna/listræna sýn leikstjóra (einkum á þróunarstigi).",
+      "what_it_must_prove": "Myndræn sýn (visual language), leikstjórnarstíll, tónn; oft með moodboard eða mood-reel.",
+      "format_limit": "Engin föst lengd; sjónrænt efni styrkir.",
+      "naming_convention": "[HEITI_VERKEFNIS]_GreinargerdLeikstjora_v1.pdf",
+      "common_weaknesses": "Engin sjónræn sýn; almennar yfirlýsingar."
+    },
+    {
+      "doc_key": "progress_plan", "name_is": "Framvinduáætlun", "name_en": "Progress plan / timeline",
+      "aliases": ["framvinduáætlun"],
+      "purpose": "Sýna tímalínu verkefnis.",
+      "what_it_must_prove": "Hvenær næsta uppkasti er skilað, hvenær þróun lýkur og hvenær stefnt er á framleiðslu. (Barnaefni ≤12 ára: miða við skil næsta stigs innan 4 mánaða.)",
+      "format_limit": "Skrifleg tímalína.",
+      "naming_convention": "[HEITI_VERKEFNIS]_Framvinduaetlun_v1.pdf",
+      "common_weaknesses": "Óraunhæf eða óljós tímalína."
+    },
+    {
+      "doc_key": "show_bible", "name_is": "Þáttahandbók (Show Bible)", "name_en": "Show bible",
+      "aliases": ["þáttahandbók", "show bible", "showbible"],
+      "purpose": "Sýna heildarlistræna sýn sjónvarpsþáttaraðar.",
+      "what_it_must_prove": "Concept, persónuprófílar (breytingakúrfur), world-building, tónn & stíll, season arc og þáttaskipt yfirlit. Myndskreytt í Stig II og III.",
+      "format_limit": "Drög í Stig I; ítarleg/myndskreytt í Stig II; fullbúin í Stig III.",
+      "naming_convention": "[HEITI_RADAR]_ShowBible_v[NUMER].pdf",
+      "common_weaknesses": "Ekki myndskreytt þegar þess er krafist; vantar season arc eða þáttaskipt yfirlit."
+    },
+    {
+      "doc_key": "episode_outline", "name_is": "Útdráttur fyrir aðra þætti", "name_en": "Episode outlines",
+      "aliases": ["útdráttur fyrir aðra þætti", "episodes outline", "heildarútdráttur fyrir alla"],
+      "purpose": "Sýna framvindu hvers þáttar í seríunni.",
+      "what_it_must_prove": "1–2 bls. á hvern þátt: helstu söguþræðir (Plot A, Plot B) og hvernig hverjum þætti lýkur (cliffhanger).",
+      "format_limit": "1–2 blaðsíður á hvern þátt.",
+      "naming_convention": "[HEITI_RADAR]_Utdrattur_Thaettir_v1.pdf",
+      "common_weaknesses": "Vantar cliffhangers/þáttaskil; of almennt."
+    },
+    {
+      "doc_key": "budget", "name_is": "Kostnaðaráætlun", "name_en": "Budget",
+      "aliases": ["kostnaðaráætlun", "kostnaðar- og fjármögnunaráætlun"],
+      "purpose": "Sýna áætlaðan kostnað viðkomandi fasa.",
+      "what_it_must_prove": "Sundurliðaður, raunhæfur kostnaður á markaðsvirði (handritsgerð / þróun / framleiðsla / eftirvinnsla eftir stigi).",
+      "format_limit": "Á íslensku.",
+      "naming_convention": "[HEITI_VERKEFNIS]_Kostnadaraetlun_v1.pdf",
+      "common_weaknesses": "Vanmetinn kostnaður; ekki á markaðsvirði."
+    },
+    {
+      "doc_key": "finance_plan", "name_is": "Fjármögnunaráætlun", "name_en": "Financing plan",
+      "aliases": ["fjármögnunaráætlun", "fjármögnun"],
+      "purpose": "Sýna hvernig verkefnið verður fjármagnað.",
+      "what_it_must_prove": "Raunhæfar fjármögnunarleiðir; samningar/vilyrði; tengingar við norræna/evrópska sjóði (t.d. Nordisk Film & TV Fond, Creative Europe MEDIA) ef við á.",
+      "format_limit": "Bráðabirgða á fyrri stigum; staðfest með samningum/vilyrðum á framleiðslustigi.",
+      "naming_convention": "[HEITI_VERKEFNIS]_Fjarmognunaraetlun_v1.pdf",
+      "common_weaknesses": "Óstaðfest fjármögnun; engar tengingar við meðfjármögnun."
+    },
+    {
+      "doc_key": "rough_cut", "name_is": "Grófklipp (rough cut)", "name_en": "Rough cut",
+      "aliases": ["grófklipp", "rough cut", "sýnishorn"],
+      "purpose": "Sýna að mynd sé á lokametrunum (eftirvinnslustyrkur).",
+      "what_it_must_prove": "Listræna burði verksins; að styrkur tryggi að myndin klárist á tilsettum tíma. Hlekkur á læst svæði (t.d. Vimeo).",
+      "format_limit": "Grófklipp eða sýnishorn.",
+      "naming_convention": "[HEITI_VERKEFNIS]_RoughCut_link.txt",
+      "common_weaknesses": "Of hrátt til að meta; sýnir ekki listræna burði."
+    },
+    {
+      "doc_key": "distribution_plan", "name_is": "Dreifingar- og markaðsáætlun", "name_en": "Distribution & marketing plan",
+      "aliases": ["dreifingar- og markaðsáætlun", "markaðs- og kynningaráætlun", "markaðsáætlun", "dreifingar"],
+      "purpose": "Sýna leið verksins á markað/áhorfendur.",
+      "what_it_must_prove": "Hnitmiðuð, raunhæf áætlun: sýningarsamningar, P&A kostnaður, markhópar, samstarf við miðla/áhrifavalda, áætlaður áhorfendafjöldi.",
+      "format_limit": "—",
+      "naming_convention": "[HEITI_VERKEFNIS]_Markadsaetlun_v1.pdf",
+      "common_weaknesses": "Almennar fullyrðingar án markvissrar áætlunar."
+    },
+    {
+      "doc_key": "script", "name_is": "Handrit (uppkast/fullbúið)", "name_en": "Script (draft/final)",
+      "aliases": ["handrit að", "fullbúið handrit", "fullskrifað handrit", "uppkast að handrit", "nýjasta útgáfa handrits", "uppfært handrit", "öll handrit"],
+      "purpose": "Sjálft handritsverkið á viðeigandi stigi.",
+      "what_it_must_prove": "Allar senur útskrifaðar með samtölum sem standast listrænt mat (fullbúið = tilbúið til þróunar/framleiðslu).",
+      "format_limit": "Eftir stigi: uppkast, fullskrifað, eða lokadrög.",
+      "naming_convention": "[HEITI_VERKEFNIS]_Handrit_v[NUMER].pdf",
+      "common_weaknesses": "Ófullgert; stenst ekki listrænt mat."
+    },
+    {
+      "doc_key": "shooting_plan", "name_is": "Framleiðslu- og tökuáætlun", "name_en": "Production / shooting schedule",
+      "aliases": ["tökuáætlun", "framleiðslu- og tökuáætlun", "framleiðslu- og tökuáætlun"],
+      "purpose": "Sýna raunhæfa framleiðslu-/tökuskipulagningu.",
+      "what_it_must_prove": "Tökudagar, staðsetningar og raunhæf framvinda framleiðslu.",
+      "format_limit": "—", "naming_convention": "[HEITI_VERKEFNIS]_Tokuaetlun_v1.pdf",
+      "common_weaknesses": "Óraunhæfur tökudagafjöldi miðað við umfang."
+    },
+    {
+      "doc_key": "key_crew_agreement", "name_is": "Samningar við lykilaðila", "name_en": "Key-crew agreements",
+      "aliases": ["samningar við leikstjóra", "samningur við handritshöfund", "eftirvinnslufyrirtæki", "samningar við ", "lykilstarfsmenn á"],
+      "purpose": "Festa lykilaðila við verkefnið.",
+      "what_it_must_prove": "Undirritaðir samningar við leikstjóra, höfund og aðra lykilstarfsmenn (eða eftirvinnslufyrirtæki á eftirvinnslustigi).",
+      "format_limit": "—", "naming_convention": "[HEITI_VERKEFNIS]_Samningar_[HLUTVERK].pdf",
+      "common_weaknesses": "Munnleg vilyrði í stað undirritaðra samninga."
+    },
+    {
+      "doc_key": "broadcaster_agreement", "name_is": "Samningur/áhugayfirlýsing sýningaraðila", "name_en": "Broadcaster/exhibitor agreement or LOI",
+      "aliases": ["sýningaraðila", "sýningarsamningur", "áhugayfirlýsing", "loi", "letter of intent"],
+      "purpose": "Sýna áhuga/skuldbindingu sýningar- eða streymisaðila.",
+      "what_it_must_prove": "Samningur eða áhugayfirlýsing (LOI) frá sjónvarpsstöð/streymisveitu/kvikmyndahúsi. Flýtir afgreiðslu og eykur líkur verulega.",
+      "format_limit": "—", "naming_convention": "[HEITI_VERKEFNIS]_LOI_[ADILI].pdf",
+      "common_weaknesses": "Enginn sýningaraðili kominn að; óbindandi almennar yfirlýsingar."
+    },
+    {
+      "doc_key": "visual_approach", "name_is": "Sjónræn nálgun (moodboard/teaser)", "name_en": "Visual approach (moodboard/teaser)",
+      "aliases": ["sjónræn nálgun", "moodboard", "teaser", "mood-reel"],
+      "purpose": "Sýna sjónrænt tungumál verksins (einkum á þróunarstigi).",
+      "what_it_must_prove": "Pitch-deck, moodboard eða stuttur teaser sem miðlar sjónrænni sýn; skiptir oft sköpum við mat ráðgjafa.",
+      "format_limit": "Hlekkur (Vimeo/YouTube) eða PDF.",
+      "naming_convention": "[HEITI_VERKEFNIS]_Moodboard_v1.pdf",
+      "common_weaknesses": "Engin sjónræn sýn á þróunarstigi."
+    },
+    {
+      "doc_key": "auditor_report", "name_is": "Endurskoðendaskýrsla / lokauppgjör", "name_en": "Auditor report / final accounts",
+      "aliases": ["endurskoðanda", "lokauppgjör", "hreyfingalisti", "staðgreiðslugjald", "kostnaðaruppgjör"],
+      "purpose": "Staðfesta raunkostnað við lokaskil/endurgreiðslu.",
+      "what_it_must_prove": "Skýrsla löggilts endurskoðanda um raunkostnað og greiðslur; hreyfingalisti úr bókhaldi; samanburður áætlunar og raunkostnaðar.",
+      "format_limit": "Löggiltur endurskoðandi.",
+      "naming_convention": "[HEITI_VERKEFNIS]_Endurskodun.pdf",
+      "common_weaknesses": "Óvissir liðir (persónuleg útgjöld) sem KMÍ hafnar; reikningar ekki stílaðir á rétt félag."
+    },
+    {
+      "doc_key": "tax_clearance", "name_is": "Skuldleysisvottorð ríkissjóðs", "name_en": "Tax clearance certificate",
+      "aliases": ["skuldleysisvottorð"],
+      "purpose": "Staðfesta skuldleysi við ríkissjóð (endurgreiðsla, útborgun).",
+      "what_it_must_prove": "Að félagið skuldi ekki opinber gjöld; má ekki vera eldra en tveggja vikna við innsendingu.",
+      "format_limit": "Ekki eldra en 2 vikna.", "naming_convention": "[HEITI_VERKEFNIS]_Skuldleysisvottord.pdf",
+      "common_weaknesses": "Útrunnið vottorð."
+    },
+    {
+      "doc_key": "archive_receipt", "name_is": "Kvittun frá Kvikmyndasafni Íslands", "name_en": "Film-archive deposit receipt",
+      "aliases": ["kvikmyndasafn"],
+      "purpose": "Staðfesta skilaskyldu til Kvikmyndasafns Íslands.",
+      "what_it_must_prove": "Að sýningarefni og varðveislugögnum hafi verið skilað (skilyrði fyrir lokagreiðslu/endurgreiðslu).",
+      "format_limit": "—", "naming_convention": "[HEITI_VERKEFNIS]_Kvikmyndasafn_kvittun.pdf",
+      "common_weaknesses": "Skil ekki innt af hendi áður en lokagreiðsla er innheimt."
+    }
+  ]
+}

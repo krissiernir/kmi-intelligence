@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "kmi-intelligence": {
+      "command": "/Users/kristjan/Create/Coding/KMI_Copilot/kmi-intelligence/.venv-rag/bin/python",
+      "args": ["-m", "kmi_intelligence.mcp_server"],
+      "env": {
+        "PYTHONPATH": "/Users/kristjan/Create/Coding/KMI_Copilot/kmi-intelligence/src"
+      }
+    }
+  }
+}

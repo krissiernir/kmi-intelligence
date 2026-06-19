@@ -1,0 +1,268 @@
+{
+  "_about": "Source registry. Every curated record's _meta.sources[] id resolves here. fetch.py maintains content_sha256 + fetched_at for downloaded artifacts.",
+  "sources": [
+    {
+      "id": "src.kmi_styrkir",
+      "title": "Styrkir — yfirlit yfir styrkjaflokka KMÍ",
+      "url": "https://www.kvikmyndamidstod.is/kvikmyndagerd/styrkir",
+      "source_type": "web",
+      "checked_at": "2026-06-19",
+      "notes": "Landing page listing the 6 grant families and links to portal gáttir."
+    },
+    {
+      "id": "src.kmi_leidbeiningar",
+      "title": "Leiðbeiningar fyrir umsækjendur",
+      "url": "https://www.kvikmyndamidstod.is/kvikmyndagerd/leidbeiningar",
+      "source_type": "web",
+      "checked_at": "2026-06-19"
+    },
+    {
+      "id": "src.kmi_umsoknarferlid",
+      "title": "Umsóknarferlið",
+      "url": "https://www.kvikmyndamidstod.is/kvikmyndagerd/umsoknarferlid",
+      "source_type": "web",
+      "checked_at": "2026-06-19"
+    },
+    {
+      "id": "src.kmi_uthlutanir",
+      "title": "Úthlutanir (current)",
+      "url": "https://www.kvikmyndamidstod.is/kvikmyndagerd/uthlutanir",
+      "source_type": "web",
+      "checked_at": "2026-06-19"
+    },
+    {
+      "id": "src.kmi_uthlutanir_fyrri_ara",
+      "title": "Úthlutanir fyrri ára",
+      "url": "https://www.kvikmyndamidstod.is/kvikmyndagerd/uthlutanir/uthlutanir-fyrri-ara",
+      "source_type": "web",
+      "checked_at": "2026-06-19",
+      "notes": "Links to the yearly allocation PDFs (2021-2024 as of check)."
+    },
+    {
+      "id": "src.kmi_endurgreidslukerfi",
+      "title": "Endurgreiðslukerfi",
+      "url": "https://www.kvikmyndamidstod.is/kvikmyndagerd/endurgreidslukerfi",
+      "source_type": "web",
+      "checked_at": "2026-06-19"
+    },
+    {
+      "id": "src.kmi_skil_framleidslustyrkir",
+      "title": "Skil á efni vegna framleiðslustyrkja og vilyrða",
+      "url": "https://www.kvikmyndamidstod.is/kvikmyndagerd/styrkir/framleidslustyrkir/skil-a-efni-vegna-framleidslustyrkja-og-vilyrda",
+      "source_type": "web",
+      "checked_at": "2026-06-19"
+    },
+    {
+      "id": "src.kmi_log_og_reglugerdir",
+      "title": "Lög og reglugerðir (KMÍ)",
+      "url": "https://www.kvikmyndamidstod.is/um-kmi/log-og-reglugerdir/fjarveitingar",
+      "source_type": "web",
+      "checked_at": "2026-06-19"
+    },
+    {
+      "id": "src.umsoknagatt",
+      "title": "Umsóknargátt KMÍ (application portal)",
+      "url": "https://umsokn.kvikmyndamidstod.is/web/index.html",
+      "source_type": "web_app",
+      "checked_at": "2026-06-19",
+      "notes": "Each grant stream has a gátta id; deep link pattern: /web/portal/application.html?id=<ID>."
+    },
+    {
+      "id": "src.reglugerd_229_2003",
+      "title": "Reglugerð um Kvikmyndasjóð nr. 229/2003",
+      "url": "https://www.reglugerd.is/reglugerdir/allar/nr/229-2003",
+      "source_type": "regulation",
+      "checked_at": "2026-06-19",
+      "notes": "Referenced in deliverables (13. gr. um lokaskil). Needs full ingestion."
+    },
+    {
+      "id": "src.kvikmyndalog_137_2001",
+      "title": "Kvikmyndalög nr. 137/2001",
+      "url": "https://www.althingi.is/lagas/nuna/2001137.html",
+      "source_type": "law",
+      "checked_at": "2026-06-19",
+      "notes": "Legal backbone for KMÍ + Kvikmyndasjóður. Needs full ingestion."
+    },
+    {
+      "id": "src.kvikmyndasafn_skilaskylda",
+      "title": "Skilaskylda — Kvikmyndasafn Íslands",
+      "url": "https://kvikmyndasafn.is/skilaskylda/",
+      "source_type": "web",
+      "checked_at": "2026-06-19"
+    },
+    {
+      "id": "src.uthlutanir_2024_pdf",
+      "title": "Úthlutanir 2024",
+      "url": "https://kmi.payload.is/api/media/file/%C3%9Athlutanir%202024b.pdf",
+      "source_type": "pdf",
+      "local_path": "data/raw/uthlutanir/uthlutanir_2024.pdf",
+      "content_sha256": "41a88048ae33b43f76bbc46afd91a4ec78e74570fb0eb5b11bbaa1ae148ee057",
+      "fetched_at": "2026-06-19",
+      "checked_at": "2026-06-19",
+      "notes": "19 pages, text-extractable. Year-scoped allocation tables by family/format."
+    },
+    {
+      "id": "src.uthlutanir_2023_pdf",
+      "title": "Úthlutanir 2023",
+      "url": "https://kmi.payload.is/api/media/file/%C3%9Athlutanir%202023.pdf",
+      "source_type": "pdf",
+      "local_path": "data/raw/uthlutanir/uthlutanir_2023.pdf",
+      "content_sha256": "74edaef2faf02347af684d9472a4641361be9c223376c3f3d8e4a6ef1278ebd7",
+      "fetched_at": "2026-06-19",
+      "checked_at": "2026-06-19",
+      "notes": "17 pages, text-extractable."
+    },
+    {
+      "id": "src.uthlutanir_2022_pdf",
+      "title": "Úthlutanir 2022",
+      "url": "https://kmi.payload.is/api/media/file/%C3%9Athlutanir%202022.pdf",
+      "source_type": "pdf",
+      "local_path": "data/raw/uthlutanir/uthlutanir_2022.pdf",
+      "content_sha256": "82dd383403e79e6face328ef1bb7fdb571252124c095e7a072dc6fbdc88da026",
+      "fetched_at": "2026-06-19",
+      "checked_at": "2026-06-19",
+      "notes": "1.3MB, text-extractable."
+    },
+    {
+      "id": "src.uthlutanir_2021_pdf",
+      "title": "Úthlutanir 2021",
+      "url": "https://kmi.payload.is/api/media/file/%C3%9Athlutanir%202021.pdf",
+      "source_type": "pdf",
+      "local_path": "data/raw/uthlutanir/uthlutanir_2021.pdf",
+      "content_sha256": "fd0652d84dd85faa5771451f35e40cb97bd2d7b95193b20fbdb472301d328d8a",
+      "fetched_at": "2026-06-19",
+      "checked_at": "2026-06-19",
+      "notes": "17 pages, text-extractable."
+    },
+    {
+      "id": "src.kmi_handrit_leiknar",
+      "title": "Handritsstyrkir fyrir leiknar kvikmyndir (grant detail page)",
+      "url": "https://www.kvikmyndamidstod.is/kvikmyndagerd/styrkir/handritsstyrkir-fyrir-leiknar-kvikmyndir",
+      "source_type": "web",
+      "local_path": "data/raw/html/handrit_leiknar.html",
+      "content_sha256": "58e9eff5ce3ebcc6",
+      "fetched_at": "2026-06-19", "checked_at": "2026-06-19",
+      "notes": "Authoritative current amounts: 1./2. handritsstyrkur 1.5M each, 1.+2. samtímis 3.0M. Includes reyndur höfundur/framleiðandi definitions."
+    },
+    {
+      "id": "src.kmi_handrit_sjonvarp",
+      "title": "Handritsstyrkir fyrir leikið sjónvarpsefni (grant detail page)",
+      "url": "https://www.kvikmyndamidstod.is/kvikmyndagerd/styrkir/handritsstyrkir-fyrir-leikid-sjonvarpsefni",
+      "source_type": "web",
+      "local_path": "data/raw/html/handrit_sjonvarp.html",
+      "content_sha256": "7fe62db2aa9f2c2b",
+      "fetched_at": "2026-06-19", "checked_at": "2026-06-19",
+      "notes": "Current amounts: I/II 1.5M, III 3.0M; total screenwriting cap 3.0M per project."
+    },
+    {
+      "id": "src.kmi_throun_framleidsla_leikid",
+      "title": "Fyrir leikið efni í fullri lengd — þróun & framleiðsla (detail page)",
+      "url": "https://www.kvikmyndamidstod.is/kvikmyndagerd/styrkir/fyrir-leikid-efni-i-fullri-lengd-kvikmyndir-og-sjonvarpsthaetti",
+      "source_type": "web",
+      "local_path": "data/raw/html/throun_framleidsla_leikid.html",
+      "content_sha256": "af9f60a681846743",
+      "fetched_at": "2026-06-19", "checked_at": "2026-06-19",
+      "notes": "Development & production amounts: 'Upphæð fer eftir umfangi verkefnis' (scope-dependent, no fixed cap). 2. þróunarstyrkur only for projects with a production-grant vilyrði."
+    },
+    {
+      "id": "src.kmi_framleidslustyrkir",
+      "title": "Framleiðslustyrkir (production grant detail page)",
+      "url": "https://www.kvikmyndamidstod.is/kvikmyndagerd/styrkir/framleidslustyrkir",
+      "source_type": "web",
+      "local_path": "data/raw/html/framleidslustyrkir.html",
+      "content_sha256": "1b598b41bff2ec2c",
+      "fetched_at": "2026-06-19", "checked_at": "2026-06-19",
+      "notes": "Production amounts scope-dependent; processing 10-12 weeks."
+    },
+    {
+      "id": "src.kmi_eftirvinnslustyrkir",
+      "title": "Eftirvinnslustyrkir fyrir leiknar kvikmyndir (post-production detail page)",
+      "url": "https://www.kvikmyndamidstod.is/kvikmyndagerd/styrkir/eftirvinnslustyrkir-fyrir-leiknar-kvikmyndir",
+      "source_type": "web",
+      "local_path": "data/raw/html/eftirvinnslustyrkir.html",
+      "content_sha256": "6b52c09524a6daa6",
+      "fetched_at": "2026-06-19", "checked_at": "2026-06-19",
+      "notes": "Post-production Hámarksupphæð 15.000.000 kr."
+    },
+    {
+      "id": "src.kmi_html_snapshots",
+      "title": "KMÍ web-page snapshots (data/raw/html/)",
+      "url": "local",
+      "source_type": "html_snapshot",
+      "local_path": "data/raw/html/",
+      "checked_at": "2026-06-19",
+      "notes": "18 server-rendered KMÍ pages fetched via ingest/fetch.py (raw .html + extracted .txt). The umsokn.* application portal is login-gated and not fetchable."
+    },
+    {
+      "id": "src.kmi_sitemap_mirror",
+      "title": "KMÍ full sitemap mirror (342 pages)",
+      "url": "https://www.kvikmyndamidstod.is/sitemap.xml",
+      "source_type": "site_mirror",
+      "local_path": "data/raw/site/",
+      "checked_at": "2026-06-19",
+      "notes": "Complete snapshot of all 342 KMÍ pages (html + text + manifest.json) via ingest/fetch.py --sitemap. Sections: kvikmyndamenning/frettir (~273 news → Zone 3 corpus), kvikmyndagerd (grants → Zone 1), um-kmi/tolulegar-upplysingar + ahorf (stats → Zone 2 lx_*). Selectively curated, not bulk-loaded. See docs/ARCHITECTURE-v3.md."
+    },
+    {
+      "id": "src.imdb_datasets",
+      "title": "IMDb official datasets (title.principals, name.basics)",
+      "url": "https://datasets.imdbws.com/",
+      "source_type": "imdb_datasets",
+      "local_path": "data/raw/imdb/",
+      "checked_at": "2026-06-19",
+      "notes": "Personal/non-commercial license — NOT redistributable. Principal cast + key crew (director/writer/producer/cinematographer(DoP)/editor/composer/production_designer/cast) with nconst strong keys. Does NOT include full department crew (gaffers, line producers). FALLBACK only — superseded for content by src.imdbinfo (full credits). Cinemagoer/web scraping is blocked (HTTP 202). Streamed+filtered to our tconsts via ingest/imdb_datasets.py."
+    },
+    {
+      "id": "src.imdbinfo",
+      "title": "IMDb full credits via imdbinfo (tveronesi/imdbinfo)",
+      "url": "https://github.com/tveronesi/imdbinfo",
+      "source_type": "imdb_scrape",
+      "local_path": "data/raw/imdb_full/",
+      "checked_at": "2026-06-19",
+      "notes": "PRIMARY IMDb enrichment. MIT-licensed library that parses IMDb's modern embedded JSON → the FULL credits page (~50 departments incl. camera/sound/editorial/make-up/VFX/assistant-director and, when IMDb lists them, gaffers & line producers), plus company_credits (production/sales/distribution), awards tallies, worldwide_gross, production_budget, AKAs. Strong keys: nconst (people), conmst (companies). DATA is still IMDb's & scraped — same rule as src.imdb_datasets: PRIVATE research only, NEVER ship any IMDb-derived field in export/. Throttled + WAF backoff via ingest/imdb_enrich.py; persistent parser failures (e.g. KeyError 'rowTitle') are skipped to failures.json with src.imdb_datasets as fallback."
+    },
+    {
+      "id": "src.the_numbers",
+      "title": "The Numbers (Nash Information Services) — box office",
+      "url": "https://www.the-numbers.com",
+      "source_type": "reference",
+      "checked_at": "2026-06-19",
+      "notes": "REFERENCE ONLY — no scraper built. US/intl theatrical box office; proprietary (© Nash Information Services, all rights reserved; no public API — sold via OpusData/Data Services). Iceland is not a tracked territory, so it has ~nothing for domestic admissions/aðsókn (use the mirrored KMÍ áhorf pages instead) and only the rare Icelandic festival breakout with a US release overlaps — low payoff + legally fraught to scrape. Kept registered as a manual cross-check for worldwide gross on the few wide-release titles."
+    },
+    {
+      "id": "src.wikipedia_is",
+      "title": "Wikipedia (is) — Listi yfir íslenskar kvikmyndir",
+      "url": "https://is.wikipedia.org/wiki/Listi_yfir_íslenskar_kvikmyndir",
+      "source_type": "wikipedia",
+      "local_path": "data/raw/wikipedia/",
+      "checked_at": "2026-06-19",
+      "notes": "CC BY-SA. Server-rendered film list using {{Kvikmyndalisti}} templates (titill/frumsýnd/leikstjóri + kvikmyndir.is id). Source for the FILMS catalog (kvikmyndir.is films are Algolia-gated). confidence=needs_verification."
+    },
+    {
+      "id": "src.producers_is",
+      "title": "producers.is — Samband íslenskra kvikmyndaframleiðenda (SÍK) félagaskrá",
+      "url": "https://producers.is/index.php/felagaskra",
+      "source_type": "association_registry",
+      "local_path": "data/raw/producers/",
+      "checked_at": "2026-06-19",
+      "notes": "Authoritative member directory of Icelandic production companies (40 members w/ website/email/phone). Zone 2 `company` entity authority — the canonical anchor for company resolution against KMÍ allocations. confidence=verified for membership."
+    },
+    {
+      "id": "src.kvikmyndir_is",
+      "title": "kvikmyndir.is — Icelandic film & TV database (community)",
+      "url": "https://kvikmyndir.is/islenskir-thaettir/",
+      "source_type": "external_db",
+      "local_path": "data/raw/kvikmyndir/",
+      "checked_at": "2026-06-19",
+      "notes": "Third-party Icelandic production catalog used to cross-reference the KMÍ ledger (what was produced/aired, with/without a grant). Series list is server-rendered; films are behind Algolia (not yet ingested). confidence=needs_verification."
+    },
+    {
+      "id": "src.manual_curation",
+      "title": "Manual curation (Kristján) — original hand-built JSON/TXT",
+      "url": "local",
+      "source_type": "manual_curation",
+      "local_path": "data/raw/manual/",
+      "checked_at": "2026-05-30",
+      "notes": "User's pre-existing curated grant data (Styrkir Json/, kmi_grants_db.json, kmi_deliverables.json). High quality but unverified against the live source; treat as needs_verification until cross-checked."
+    }
+  ]
+}

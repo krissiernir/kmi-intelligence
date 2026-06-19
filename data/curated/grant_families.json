@@ -1,0 +1,61 @@
+{
+  "_about": "Top-level KMÍ grant families. Streams (gáttir) live in grant_streams.json and reference family by id.",
+  "families": [
+    {
+      "id": "handrit",
+      "name_is": "Handritsstyrkir",
+      "name_en": "Screenwriting grants",
+      "purpose": "Stuðningur við ritun og þróun handrita (sögulýsing, uppkast, endurskrif).",
+      "format_tracks": ["leikin_kvikmynd", "leikid_sjonvarp", "heimildamynd"],
+      "_meta": {"sources": ["src.kmi_styrkir", "src.manual_curation"], "confidence": "needs_verification", "checked_at": "2026-06-19"}
+    },
+    {
+      "id": "throun",
+      "name_is": "Þróunarstyrkir",
+      "name_en": "Development grants",
+      "purpose": "Að búa verkefnið undir framleiðslu: festa leikstjóra/leikara/meðframleiðendur, prufuupptökur, fjármögnunaráætlanir, sjónræn sýn.",
+      "format_tracks": ["leikin_kvikmynd", "leikid_sjonvarp", "heimildamynd"],
+      "_meta": {"sources": ["src.kmi_styrkir", "src.manual_curation"], "confidence": "needs_verification", "checked_at": "2026-06-19"}
+    },
+    {
+      "id": "framleidsla",
+      "name_is": "Framleiðslustyrkir",
+      "name_en": "Production grants",
+      "purpose": "Framlag til framleiðslu leikinna kvikmynda, stuttmynda, sjónvarpsefnis og heimildamynda.",
+      "format_tracks": ["leikin_kvikmynd", "leikid_sjonvarp", "heimildamynd", "stuttmynd"],
+      "_meta": {"sources": ["src.kmi_styrkir", "src.manual_curation"], "confidence": "needs_verification", "checked_at": "2026-06-19"}
+    },
+    {
+      "id": "eftirvinnsla",
+      "name_is": "Eftirvinnslustyrkir",
+      "name_en": "Post-production grants",
+      "purpose": "Að ljúka fullteknum myndum sem vantar fjármagn í hljóðvinnslu, litgreiningu, VFX eða klippingu.",
+      "format_tracks": ["leikin_kvikmynd"],
+      "_meta": {"sources": ["src.kmi_styrkir", "src.manual_curation"], "confidence": "needs_verification", "checked_at": "2026-06-19"}
+    },
+    {
+      "id": "endurgreidsla",
+      "name_is": "Endurgreiðslur (endurgreiðslukerfi)",
+      "name_en": "Production rebate scheme",
+      "purpose": "Endurgreiðsla hluta innlends framleiðslukostnaðar (25% / 35%). Sjá rebate.json.",
+      "format_tracks": ["allt"],
+      "_meta": {"sources": ["src.kmi_endurgreidslukerfi", "src.manual_curation"], "confidence": "needs_verification", "checked_at": "2026-06-19"}
+    },
+    {
+      "id": "annad",
+      "name_is": "Aðrir styrkir",
+      "name_en": "Other grants",
+      "purpose": "Kvikmyndahátíðir innanlands, kynningarstyrkir, listræn kvikmyndahús, fagviðburðir, sýningarstyrkir, þátttaka í vinnustofum.",
+      "format_tracks": ["annad"],
+      "subtypes": [
+        "Kvikmyndahátíðir innanlands",
+        "Kynningarstyrkir",
+        "Listræn kvikmyndahús",
+        "Styrkir til fagviðburða",
+        "Sýningarstyrkir",
+        "Þátttaka í vinnustofum"
+      ],
+      "_meta": {"sources": ["src.kmi_styrkir"], "confidence": "needs_verification", "checked_at": "2026-06-19", "notes": "Subtype gátta ids not yet captured except sýningarstyrkir (UAPTYZ). TODO: ingest each from portal."}
+    }
+  ]
+}

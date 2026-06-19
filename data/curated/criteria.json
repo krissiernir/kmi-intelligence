@@ -1,0 +1,30 @@
+{
+  "_about": "Evaluation axes KMÍ advisors (ráðgjafar) weigh when assessing applications. Useful for self-review and 'how would a skeptical reviewer critique this' prompts.",
+  "_meta": {"sources": ["src.manual_curation", "src.kmi_handrit_leiknar"], "confidence": "needs_verification", "checked_at": "2026-06-19"},
+  "criteria": [
+    {
+      "id": "listraent_gildi", "name_is": "Listrænt gildi", "name_en": "Artistic value",
+      "description": "Mat á frumleika hugmyndar, dýpt persóna, gæðum textans og hvort verkið hafi listrænan styrk og sérstæð efnistök.",
+      "evidence_examples": "Sterk, frumleg rödd; vel mótaðar persónur; áræðin efnistök; skýr listræn sýn í greinargerð höfundar/leikstjóra.",
+      "red_flags": "Klisjukennd hugmynd; grunnar persónur; engin sérstaða; sýn sem er endursögn söguþráðar."
+    },
+    {
+      "id": "framkvaemdarhaefni", "name_is": "Framkvæmdarhæfni", "name_en": "Feasibility / execution",
+      "description": "Mat á því hvort tímaáætlun sé raunhæf og hvort teymið (sérstaklega ef framleiðandi er kominn að) hafi getu til að koma verkefninu áfram.",
+      "evidence_examples": "Reyndur framleiðandi kominn að; raunhæf framvindu- og kostnaðaráætlun; skýr næstu skref.",
+      "red_flags": "Óraunhæf tímalína; reynslulítið teymi án framleiðanda; vanmetinn kostnaður."
+    },
+    {
+      "id": "markhopur_og_dreifing", "name_is": "Markhópur og dreifing", "name_en": "Audience & distribution",
+      "description": "Hvort verkefnið eigi erindi til áhorfenda á Íslandi eða erlendis (t.d. á hátíðum) og hvort dreifileiðir séu raunhæfar.",
+      "evidence_examples": "Skilgreindur markhópur; áhugi sýningar-/streymisaðila (LOI); hátíðastefna; meðfjármögnun erlendis.",
+      "red_flags": "Enginn skilgreindur markhópur; engar dreifileiðir; ‚öll fjölskyldan‘ án rökstuðnings."
+    },
+    {
+      "id": "jafnretti", "name_is": "Jafnrétti", "name_en": "Gender equality",
+      "description": "Hvort verkefnið stuðli að jöfnun á stöðu kvenna og karla í kvikmyndagerð (kynjahlutföll í lykilstörfum og hlutverkum).",
+      "evidence_examples": "Jöfn kynjahlutföll í lykilstöðum; meðvituð nálgun á framsetningu kynja.",
+      "red_flags": "Mjög skökk kynjahlutföll í lykilstörfum án skýringa."
+    }
+  ]
+}

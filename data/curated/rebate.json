@@ -1,0 +1,24 @@
+{
+  "_about": "Endurgreiðslukerfi — Icelandic production rebate. Application streams live in grant_streams.json (endurgreidsla.*).",
+  "rebate": {
+    "id": "endurgreidslukerfi",
+    "name_is": "Endurgreiðslur vegna kvikmyndagerðar á Íslandi",
+    "name_en": "Reimbursement for film production in Iceland",
+    "rates": {
+      "general_pct": 25,
+      "general_basis": "af samþykktum innlendum framleiðslukostnaði",
+      "enhanced_pct": 35,
+      "enhanced_conditions": "35% ef ÖLLUM þremur skilyrðum er fullnægt (live: endurgreiðslukerfi-síða, verified): (1) innlendur framleiðslukostnaður a.m.k. 350 milljónir kr.; (2) a.m.k. 10 tökudagar (principal photography) á Íslandi OG samanlagt a.m.k. 30 töku- og eftirvinnsludagar á Íslandi; (3) a.m.k. 50 starfsmenn sem vinna beint að framleiðslunni á Íslandi (skattskyldir hér, hver a.m.k. einn heilan dag)."
+    },
+    "stages": [
+      {"order": 1, "id": "vilyrdi", "name_is": "Vilyrði", "description": "Sótt um áður en tökur hefjast til að fá staðfestingu á að verkefnið sé endurgreiðsluhæft.", "stream_id": "endurgreidsla.vilyrdi"},
+      {"order": 2, "id": "hlutautborgun", "name_is": "Hlutaútborgun", "description": "Sótt um á meðan á framleiðslu stendur (sjaldgæfara, í stórum verkefnum).", "stream_id": "endurgreidsla.hlutautborgun"},
+      {"order": 3, "id": "utborgun", "name_is": "Útborgun", "description": "Endanleg umsókn þegar framleiðslu er lokið og allir reikningar greiddir.", "stream_id": "endurgreidsla.utborgun"}
+    ],
+    "producer_strategy": {
+      "regla_18_manuda": "Ef áætluð/endanleg endurgreiðsla nemur 300 milljónum króna eða meira hefur KMÍ heimild til að fresta útborgun í allt að 18 mánuði frá útgáfu vilyrðis vegna fjárlagatakmarkana.",
+      "audit_trail": "Haltu bókhaldinu hreinu frá fyrsta degi. Allir reikningar í endurgreiðslu verða að vera stílaðir á rétta íslenska framleiðslufélagið og tengjast verkefninu beint. Óvissir liðir (persónuleg útgjöld, óskyldur ferðakostnaður) verða tafarlaust hafnað."
+    },
+    "_meta": {"sources": ["src.kmi_endurgreidslukerfi", "src.manual_curation"], "confidence": "verified", "checked_at": "2026-06-19", "notes": "Rates + 35% conditions verified against the live endurgreiðslukerfi page (snapshot data/raw/html/endurgreidslukerfi.html, 2026-06-19). Partial payout (hlutaútborgun) available once >=50% of total budgeted cost is paid in Iceland."}
+  }
+}
