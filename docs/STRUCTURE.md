@@ -135,11 +135,34 @@ TEXT-keyed. Built by `compile.py`.
   confidence, status) — **907** resolution-log rows. ER policy: strong-key/exact-norm auto-link;
   fuzzy candidates park `status='unresolved'` (33) for human review — **never silently merged**.
 
-Ingesters: `ingest/{kvikmyndir,wikipedia_films,producers_is,imdb_datasets,imdb_enrich}.py`. The IMDb
-fold (B4) lives in `compile.py`, reading `data/raw/imdb_full/<tt>.json` (full credits via the
+Ingesters: `ingest/{kvikmyndir,wikipedia_films,producers_is,imdb_datasets,imdb_enrich,imdb_resolve}.py`.
+The IMDb fold (B4) lives in `compile.py`, reading `data/raw/imdb_full/<tt>.json` (full credits via the
 `imdbinfo` library, run from `.venv-imdb`; `src.imdbinfo` PRIMARY, `src.imdb_datasets` fallback).
-MCP: `lookup_person`, `lookup_company` (generated dossiers). Films behind kvikmyndir.is Algolia were
-avoided in favour of CC-licensed Wikipedia.
+`imdb_resolve.py` finds tconsts for catalog titles that lack one (writes `data/curated/imdb_links.json`,
+which `compile.py` backfills). MCP: `lookup_person`, `lookup_company` (generated dossiers). Films behind
+kvikmyndir.is Algolia were avoided in favour of CC-licensed Wikipedia.
+
+### Zone 3 — CORPUS + landscape facts (reads Zone 1/2; grant tools NEVER join these)
+Source: Klapptré.is (`src.klapptre`) via its WordPress REST API. Journalistic/copyrighted →
+**local-only, never committed, never in export/** (raw under `data/raw/klapptre/`, gitignored).
+`ingest/klapptre.py` is both the ingester and the extractor; `ingest/textclean.py` cleans article
+HTML (drops shortcodes/captions + frequency-detected boilerplate). The Zone 3 build lives in
+`compile.py` (lazy-imported, so the core build never depends on it).
+- **corpus_article**(`id` PK, source, ext_id, date, year, url, slug, title, categories_json,
+  primary_category, tags_json, body_chars) — **1,705** articles (Phase-1 fact categories).
+- **corpus_mention**(article_id, entity_type [title|person|company], entity_id, raw_string, method,
+  confidence) — article→entity links (headline/table resolution; unresolved kept with NULL entity).
+- **lx_admissions**(`id` PK, title_id, film, date, year, **scope** [IS|WW], week_admissions,
+  total_admissions, gross_isk, weeks_in_release, article_id, source, confidence) — box office parsed
+  from HTML tables. `scope='IS'` domestic vs `'WW'` worldwide (the "á heimsvísu" roundups); admissions
+  >500k are dropped as mislabeled ISK gross. **1,148** rows.
+- **lx_viewership**(title_id, title_text, channel, viewers, rating_pct, episodes, …) — TV viewership
+  (Áhorfstölur), incl. the **channel** (RÚV/Stöð 2). **404** rows.
+- **lx_review**(title_id, subject, outlet, date, headline, …) — reviews (Gagnrýni); score is left NULL
+  unless explicit (never fabricated). **684** rows.
+- **lx_award**(title_id, person_id, subject, result [win|nomination], award_hint, year, headline, …) —
+  Verðlaun(win)/Tilnefningar(nomination). **575** rows.
+Run `make klapptre` to refresh; `KMI_CATS=all` mirrors the whole site (later RAG phase).
 
 ## Common queries
 ```sql

@@ -1,6 +1,6 @@
 PYTHON ?= python3
 
-.PHONY: init run fetch parse kvik wiki-films producers imdb-datasets imdb-setup imdb-enrich build packs embed embed-setup rag-search publish mcp mcp-setup all
+.PHONY: init run fetch parse kvik wiki-films producers klapptre imdb-datasets imdb-setup imdb-enrich build packs embed embed-setup rag-search publish mcp mcp-setup all
 
 init:           ## install dashboard deps (streamlit/pandas) into the active env
 	$(PYTHON) -m pip install -r requirements.txt
@@ -20,6 +20,9 @@ wiki-films:     ## ingest Wikipedia Icelandic FILMS -> data/staged/productions_f
 
 producers:      ## ingest SÍK member companies (producers.is félagaskrá) -> Zone 2 company entities
 	$(PYTHON) -m src.kmi_intelligence.ingest.producers_is
+
+klapptre:       ## Zone 3: Klapptré fact articles -> data/raw/klapptre/ (KMI_CATS=all for whole site)
+	$(PYTHON) -m src.kmi_intelligence.ingest.klapptre
 
 imdb-datasets:  ## FALLBACK: principal cast/crew from official IMDb bulk datasets -> data/raw/imdb/
 	$(PYTHON) -m src.kmi_intelligence.ingest.imdb_datasets

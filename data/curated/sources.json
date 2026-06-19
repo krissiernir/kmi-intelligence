@@ -221,6 +221,15 @@
       "notes": "PRIMARY IMDb enrichment. MIT-licensed library that parses IMDb's modern embedded JSON → the FULL credits page (~50 departments incl. camera/sound/editorial/make-up/VFX/assistant-director and, when IMDb lists them, gaffers & line producers), plus company_credits (production/sales/distribution), awards tallies, worldwide_gross, production_budget, AKAs. Strong keys: nconst (people), conmst (companies). DATA is still IMDb's & scraped — same rule as src.imdb_datasets: PRIVATE research only, NEVER ship any IMDb-derived field in export/. Throttled + WAF backoff via ingest/imdb_enrich.py; persistent parser failures (e.g. KeyError 'rowTitle') are skipped to failures.json with src.imdb_datasets as fallback."
     },
     {
+      "id": "src.klapptre",
+      "title": "Klapptré.is — Icelandic film-industry news (WordPress REST API)",
+      "url": "https://klapptre.is/wp-json/wp/v2/posts",
+      "source_type": "news_corpus",
+      "local_path": "data/raw/klapptre/",
+      "checked_at": "2026-06-19",
+      "notes": "ZONE 3 corpus + landscape facts. WordPress REST API (clean JSON, only /wp-admin robots-disallowed). Phase 1 pulled the 5 structured 'fact' categories (~1,705 posts): Aðsóknartölur(108)+Áhorfstölur(1423)→lx_admissions/lx_viewership, Gagnrýni(106)→lx_review, Verðlaun(160)/Tilnefningar(161)→lx_award; all → corpus_article + corpus_mention. Box-office numbers come from HTML TABLES, scope-tagged IS(domestic)/WW(worldwide, 'á heimsvísu'); >500k admissions dropped as mislabeled ISK gross. JOURNALISTIC/COPYRIGHTED: local-only, NEVER committed, NEVER in export/. Isolated — grant tools never join Zone 3. ingest/klapptre.py (ingester + extractors); KMI_CATS=all mirrors the whole site (later RAG phase)."
+    },
+    {
       "id": "src.the_numbers",
       "title": "The Numbers (Nash Information Services) — box office",
       "url": "https://www.the-numbers.com",

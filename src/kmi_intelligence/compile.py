@@ -146,6 +146,34 @@ CREATE TABLE alias (
     source TEXT, match_method TEXT, confidence TEXT, status TEXT
 );
 
+-- Zone 3 — CORPUS + landscape facts (reads Zone 1/2, NEVER written-to by them; grant tools never join these)
+CREATE TABLE corpus_article (
+    id INTEGER PRIMARY KEY, source TEXT, ext_id INTEGER, date TEXT, year INTEGER,
+    url TEXT, slug TEXT, title TEXT, categories_json TEXT, primary_category TEXT,
+    tags_json TEXT, body_chars INTEGER
+);
+CREATE TABLE corpus_mention (
+    article_id INTEGER, entity_type TEXT, entity_id INTEGER, raw_string TEXT,
+    method TEXT, confidence TEXT
+);
+CREATE TABLE lx_admissions (
+    id INTEGER PRIMARY KEY, title_id INTEGER, film TEXT, date TEXT, year INTEGER, scope TEXT,
+    week_admissions INTEGER, total_admissions INTEGER, gross_isk INTEGER, weeks_in_release TEXT,
+    article_id INTEGER, source TEXT, confidence TEXT
+);
+CREATE TABLE lx_viewership (
+    id INTEGER PRIMARY KEY, title_id INTEGER, title_text TEXT, channel TEXT, date TEXT, year INTEGER,
+    viewers INTEGER, rating_pct REAL, episodes INTEGER, article_id INTEGER, source TEXT, confidence TEXT
+);
+CREATE TABLE lx_review (
+    id INTEGER PRIMARY KEY, title_id INTEGER, subject TEXT, outlet TEXT, date TEXT, year INTEGER,
+    headline TEXT, article_id INTEGER, source TEXT, confidence TEXT
+);
+CREATE TABLE lx_award (
+    id INTEGER PRIMARY KEY, title_id INTEGER, person_id INTEGER, subject TEXT, result TEXT,
+    award_hint TEXT, date TEXT, year INTEGER, headline TEXT, article_id INTEGER, source TEXT, confidence TEXT
+);
+
 CREATE VIEW productions AS SELECT * FROM title;
 
 CREATE INDEX idx_streams_family ON grant_streams(family);
@@ -163,6 +191,11 @@ CREATE INDEX idx_award_title ON award(title_id);
 CREATE INDEX idx_person_nconst ON person(imdb_nconst);
 CREATE INDEX idx_company_conmst ON company(imdb_conmst);
 CREATE INDEX idx_title_tconst ON title(imdb_tconst);
+CREATE INDEX idx_lx_adm_title ON lx_admissions(title_id);
+CREATE INDEX idx_lx_view_title ON lx_viewership(title_id);
+CREATE INDEX idx_lx_review_title ON lx_review(title_id);
+CREATE INDEX idx_lx_award_title ON lx_award(title_id);
+CREATE INDEX idx_corpus_mention ON corpus_mention(entity_type, entity_id);
 """
 
 # document dict key -> requirement_level
@@ -454,9 +487,20 @@ def main() -> int:
         "SELECT id, project_title, year, amount_isk, commitment_isk, family, format_track, company, director, writer, producer FROM allocations"))
     alloc_idx = [(_norm(a["project_title"]), a) for a in allocs if len(_norm(a["project_title"])) >= 3]
 
+    # resolved IMDb links (from ingest/imdb_resolve.py) backfill tconsts onto catalog titles
+    links_path = ROOT / "data" / "curated" / "imdb_links.json"
+    imdb_link = {}            # (title_norm, year) -> tconst   +  title_norm -> tconst (fallback)
+    if links_path.exists():
+        for l in json.loads(links_path.read_text(encoding="utf-8")):
+            tt = l.get("imdb_tconst")
+            if tt:
+                imdb_link[(l.get("title_norm"), l.get("year"))] = tt
+                imdb_link.setdefault(l.get("title_norm"), tt)
+
     for prod_staged in sorted((ROOT / "data" / "staged").glob("productions_*.json")):
         for p in json.loads(prod_staged.read_text(encoding="utf-8")):
             npn, py = _norm(p.get("title")), p.get("year")
+            tconst = p.get("imdb") or imdb_link.get((npn, py)) or imdb_link.get(npn)
             matches = []
             for nt, a in alloc_idx:
                 exact = nt == npn
@@ -471,7 +515,7 @@ def main() -> int:
             cur = conn.execute(
                 "INSERT INTO title(kvik_id,imdb_tconst,title,year,kind,status,director,where_shown_json,og_type,url,source,kmi_funded,kmi_alloc_count,kmi_total_isk,kmi_years_json,match_confidence,xref_status,matched_json) "
                 "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                (p.get("kvik_id"), p.get("imdb"), p.get("title"), py, p.get("kind"), p.get("status"), p.get("director"),
+                (p.get("kvik_id"), tconst, p.get("title"), py, p.get("kind"), p.get("status"), p.get("director"),
                  json.dumps(p.get("where_shown", []), ensure_ascii=False), p.get("og_type_hint"), p.get("url"), p.get("source"),
                  1 if matches else 0, len(matches), sum(m["amount_isk"] for m in matches),
                  json.dumps(sorted({m["year"] for m in matches if m["year"]})), conf, xref,
@@ -664,6 +708,116 @@ def main() -> int:
         print(f"  IMDb fold: {istats['titles']} titles · +{istats['credits']} credits "
               f"(+{istats['new_people']} new / {istats['linked_people']} linked people) · "
               f"+{istats['tcos']} company edges (+{istats['new_cos']} new / {istats['linked_cos']} linked cos)")
+
+    # ---- Zone 3: Klapptré CORPUS + landscape facts (isolated; reads Zone 1/2 only) ----
+    kdir = ROOT / "data" / "raw" / "klapptre"
+    if kdir.exists() and any(kdir.glob("*.json")):
+        from .ingest import klapptre as kx  # lazy: core build never depends on Zone 3
+        t_by_norm, p_by_norm = {}, {}
+        for tid, nm in conn.execute("SELECT id, title FROM title"):
+            n = _norm(nm)
+            if n:
+                t_by_norm.setdefault(n, tid)
+        for pid_, nm in conn.execute("SELECT id, display_name FROM person"):
+            n = _norm(nm)
+            if n:
+                p_by_norm.setdefault(n, pid_)
+
+        def _res_title(s):
+            n = _norm(s)
+            if not n:
+                return None
+            if n in t_by_norm:
+                return t_by_norm[n]
+            if len(n) >= 5:
+                for tn, tid in t_by_norm.items():
+                    if len(tn) >= 5 and (n == tn or n in tn or tn in n):
+                        return tid
+            return None
+
+        z3 = defaultdict(int)
+        ids = {"a": 0, "adm": 0, "view": 0, "rev": 0, "awd": 0}
+        mentions = []
+
+        def _mention(art, etype, eid, raw):
+            if eid:
+                mentions.append((art, etype, eid, raw, "klapptre", "needs_verification"))
+                z3["mentions"] += 1
+
+        for a in kx.iter_articles():
+            cats = set(a["cats"])
+            date = a["date"]
+            yr = int(date[:4]) if date[:4].isdigit() else None
+            prim = next((kx.CAT_NAMES[c] for c in a["cats"] if c in kx.CAT_NAMES), None)
+            ids["a"] += 1
+            art = ids["a"]
+            conn.execute(
+                "INSERT INTO corpus_article(id,source,ext_id,date,year,url,slug,title,categories_json,primary_category,tags_json,body_chars) "
+                "VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",
+                (art, "src.klapptre", a["id"], date, yr, a["link"], a["slug"], a["title"],
+                 json.dumps(a["cats"]), prim, json.dumps(a["tags"]), len(kx.to_text(a["html"]))))
+            z3["articles"] += 1
+            if kx.CAT["adsokn"] in cats:
+                scope = "WW" if _re.search(r"heimsv[ií]su|alþjóð|internationa", a["title"].lower()) else "IS"
+                for r in kx.parse_admissions(a["html"]):
+                    tid = _res_title(r["film"])
+                    ids["adm"] += 1
+                    conn.execute(
+                        "INSERT INTO lx_admissions(id,title_id,film,date,year,scope,week_admissions,total_admissions,gross_isk,weeks_in_release,article_id,source,confidence) "
+                        "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                        (ids["adm"], tid, r["film"], date, yr, scope, r["week_admissions"], r["total_admissions"],
+                         r["gross_isk"], r["weeks_in_release"], art, "src.klapptre", "needs_verification"))
+                    _mention(art, "title", tid, r["film"])
+                    z3["admissions"] += 1
+            if kx.CAT["ahorf"] in cats:
+                for r in kx.parse_viewership(a["html"]):
+                    tid = _res_title(r["title"])
+                    ids["view"] += 1
+                    conn.execute(
+                        "INSERT INTO lx_viewership(id,title_id,title_text,channel,date,year,viewers,rating_pct,episodes,article_id,source,confidence) "
+                        "VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",
+                        (ids["view"], tid, r["title"], r["channel"], date, yr, r["viewers"],
+                         r["rating_pct"], r["episodes"], art, "src.klapptre", "needs_verification"))
+                    _mention(art, "title", tid, r["title"])
+                    z3["viewership"] += 1
+            if kx.CAT["review"] in cats:
+                subj = next((s for s in kx.headline_subjects(a["title"]) if _res_title(s)), None)
+                tid = _res_title(subj) if subj else None
+                ids["rev"] += 1
+                conn.execute(
+                    "INSERT INTO lx_review(id,title_id,subject,outlet,date,year,headline,article_id,source,confidence) "
+                    "VALUES(?,?,?,?,?,?,?,?,?,?)",
+                    (ids["rev"], tid, subj, kx.review_outlet(a["title"]), date, yr, a["title"],
+                     art, "src.klapptre", "needs_verification"))
+                _mention(art, "title", tid, subj or a["title"])
+                z3["reviews"] += 1
+            if kx.CAT["award"] in cats or kx.CAT["nomination"] in cats:
+                result = "win" if kx.CAT["award"] in cats else "nomination"
+                tid = pid_ = None
+                subj = next((s for s in kx.headline_subjects(a["title"]) if _res_title(s)), None)
+                if subj:
+                    tid = _res_title(subj)
+                else:
+                    for s in kx.name_candidates(a["title"]):
+                        if _norm(s) in p_by_norm:
+                            pid_, subj = p_by_norm[_norm(s)], s
+                            break
+                ids["awd"] += 1
+                conn.execute(
+                    "INSERT INTO lx_award(id,title_id,person_id,subject,result,award_hint,date,year,headline,article_id,source,confidence) "
+                    "VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",
+                    (ids["awd"], tid, pid_, subj, result, kx.award_hint(a["title"]), date, yr,
+                     a["title"], art, "src.klapptre", "needs_verification"))
+                _mention(art, "title", tid, subj or a["title"])
+                _mention(art, "person", pid_, subj or a["title"])
+                z3["awards"] += 1
+
+        conn.executemany(
+            "INSERT INTO corpus_mention(article_id,entity_type,entity_id,raw_string,method,confidence) VALUES(?,?,?,?,?,?)",
+            mentions)
+        print(f"  Zone 3 (Klapptré): {z3['articles']} articles · {z3['admissions']} admissions · "
+              f"{z3['viewership']} viewership · {z3['reviews']} reviews · {z3['awards']} awards · "
+              f"{z3['mentions']} mentions")
 
     conn.commit()
 
