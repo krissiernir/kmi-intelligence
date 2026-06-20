@@ -1,6 +1,6 @@
 PYTHON ?= python3
 
-.PHONY: init run fetch parse kvik wiki-films producers klapptre imdb-datasets imdb-verify imdb-setup imdb-enrich imdb-resolve build packs health log lint format validate er-setup resolve review nlp-setup embed embed-setup rag-search publish mcp mcp-setup all
+.PHONY: init run fetch parse kvik wiki-films producers klapptre imdb-datasets imdb-verify imdb-setup imdb-enrich imdb-resolve build packs health log flags lint format validate er-setup resolve review nlp-setup embed embed-setup rag-search publish mcp mcp-setup all
 
 init:           ## install dashboard deps (streamlit/pandas) into the active env
 	$(PYTHON) -m pip install -r requirements.txt
@@ -54,6 +54,9 @@ format:         ## ruff format
 
 validate:       ## Pandera gate over data/staged + curated inputs (run before build)
 	$(VALIDATE_PY) -m src.kmi_intelligence.validate
+
+flags:          ## show open data-flags raised in the app (logs/review_queue.jsonl)
+	@$(PYTHON) app/flagging.py open
 
 log:            ## show recent pipeline activity (logs/activity.jsonl)
 	@$(PYTHON) -c "import json,pathlib;p=pathlib.Path('logs/activity.jsonl');rows=[json.loads(l) for l in p.read_text().splitlines()] if p.exists() else [];[print(r['ts'],' ',r['action'].ljust(16),{k:v for k,v in r.items() if k not in('ts','action')}) for r in rows[-25:]];print('(no activity logged yet)') if not rows else None"

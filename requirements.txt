@@ -2,3 +2,6 @@
 # stdlib-only; RAG lives in .venv-rag and the IMDb enricher in .venv-imdb (see Makefile).
 streamlit>=1.35.0
 pandas>=2.2.0
+plotly>=5          # viz.py cockpit charts
+networkx>=3        # collaborator-network layout
+# anthropic>=0.40  # OPTIONAL: app/ask_biomonsi.py text-to-SQL (+ ANTHROPIC_API_KEY)

@@ -126,7 +126,12 @@ def queues(m: dict) -> list[str]:
     def mc(e, k):
         return len(md.get(e, {}).get(k, []))
 
+    rq = ROOT / "logs" / "review_queue.jsonl"
+    open_flags = sum(1 for ln in rq.read_text(encoding="utf-8").splitlines()
+                     if ln.strip() and json.loads(ln).get("status") == "open") if rq.exists() else 0
+
     return [
+        f"Open data-flags from the app (🚩 `make flags`): {open_flags}",
         f"Merge candidates to review (`make review`): company {cc('company')} · person {cc('person')}",
         f"  ↳ merged: company {mc('company','merges')} · person {mc('person','merges')}  ·  "
         f"kept-separate: company {mc('company','rejected')} · person {mc('person','rejected')}",

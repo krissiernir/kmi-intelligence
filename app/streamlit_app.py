@@ -20,8 +20,22 @@ import streamlit as st
 ROOT = Path(__file__).resolve().parents[1]
 DB = ROOT / "build" / "kmi.db"
 RAG_PY = ROOT / ".venv-rag" / "bin" / "python"
+QUEUE = ROOT / "logs" / "review_queue.jsonl"
 
-st.set_page_config(page_title="KMÍ Intelligence", layout="wide")
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))  # make app/ modules importable
+import flagging  # noqa: E402  🚩 review queue (writes its own jsonl, never kmi.db)
+import labels_is as L  # noqa: E402  Icelandic labels
+import production_profile  # noqa: E402  Framleiðslur browse + profile
+import viz  # noqa: E402  plotly cockpit charts
+
+try:
+    import ask_biomonsi  # needs anthropic + ANTHROPIC_API_KEY — optional
+except Exception:
+    ask_biomonsi = None
+
+st.set_page_config(page_title="Bíómonsi — KMÍ Intelligence", layout="wide")
 
 if not DB.exists():
     st.error("build/kmi.db not found. Run `make build` first (and `make parse` for the ledger).")
@@ -36,10 +50,15 @@ def _fold(s) -> str:
 
 
 @st.cache_data
-def q(sql: str, params: tuple = ()) -> pd.DataFrame:
+def _q_cached(sql: str, params: tuple, mtime: float) -> pd.DataFrame:
     with sqlite3.connect(DB) as c:
         c.create_function("fold", 1, _fold, deterministic=True)  # diacritic-insensitive search
         return pd.read_sql_query(sql, c, params=params)
+
+
+def q(sql: str, params: tuple = ()) -> pd.DataFrame:
+    # key the cache on the DB's mtime so a nightly rebuild / `make build` actually shows
+    return _q_cached(sql, tuple(params), DB.stat().st_mtime)
 
 
 def isk(n) -> str:
@@ -52,13 +71,24 @@ FAMILY_LABEL = {
     "endurgreidsla": "Endurgreiðsla (rebate)", "annad": "Aðrir (other)",
 }
 
-st.sidebar.title("KMÍ Intelligence")
-page = st.sidebar.radio("Page", [
-    "📊 Overview", "🎬 Grant browser", "📋 Document matrix",
-    "💰 Funding explorer", "🎞️ Productions ↔ funding", "🧑‍🎬 People & companies",
-    "📐 Amounts & rebate", "🔎 Semantic search",
-])
-st.sidebar.caption("Read-only over `build/kmi.db`. Rebuild with `make all`.")
+st.sidebar.title("🎬 Bíómonsi")
+# routing keys stay stable (English); only the DISPLAY is Icelandic (relabel = low-risk)
+PAGE_LABELS = {
+    "📊 Overview": "📊 Yfirlit",
+    "🎬 Grant browser": "🎬 Skoða styrki",
+    "📋 Document matrix": "📋 Skjalakröfur",
+    "💰 Funding explorer": "💰 Úthlutanir",
+    "🎞️ Productions ↔ funding": "🎞️ Framleiðslur",
+    "🧑‍🎬 People & companies": "🧑‍🎬 Fólk og fyrirtæki",
+    "📐 Amounts & rebate": "📐 Upphæðir og endurgreiðsla",
+    "🔎 Semantic search": "🔎 Merkingarleit",
+    "💬 Ask Bíómonsi": "💬 Spyrja Bíómonsi",
+}
+page = st.sidebar.radio("Síða", list(PAGE_LABELS), format_func=lambda p: PAGE_LABELS[p])
+st.sidebar.caption(L.t("sidebar_caption"))
+_fsum = flagging.summary(QUEUE)
+if _fsum["open"]:
+    st.sidebar.caption(f"🚩 {_fsum['open']} opin merki til skoðunar")
 
 
 # ───────────────────────── Overview ─────────────────────────
@@ -75,9 +105,18 @@ if page == "📊 Overview":
     c[2].metric("Awards 2021–2024", n_alloc)
     c[3].metric("Total disbursed", isk(total))
 
-    st.subheader("Disbursed by year")
+    st.subheader("Úthlutað eftir árum")
     by_year = q("SELECT year, SUM(amount_isk) total FROM allocations WHERE amount_isk IS NOT NULL GROUP BY year ORDER BY year")
     st.bar_chart(by_year, x="year", y="total")
+
+    # ── viz cockpit (plotly): concentration + flow + lane trends ──
+    alloc = q("SELECT year, family, amount_isk, format_track, company FROM allocations")
+    viz.treemap(st, alloc)
+    cL, cR = st.columns(2)
+    with cL:
+        viz.trends(st, alloc)
+    with cR:
+        viz.sankey(st, alloc, backend=viz.backend_picker(st, "sankey", key="ov_sankey"))
 
     st.info("**Amounts:** the *application maximum* (per gátta) and the *disbursement parts* "
             "(how awards are paid out) are different numbers — see the **Amounts & rebate** page. "
@@ -205,6 +244,7 @@ elif page == "🧑‍🎬 People & companies":
             st.subheader(f"{p['display_name']}")
             st.caption(f"Roles: {p['primary_roles']} · {p['credit_count']} credits"
                        + (f" · IMDb {p['imdb_nconst']}" if p['imdb_nconst'] else "") + f" · source {p['source']}")
+            flagging.flag_button(st, "person", int(p["id"]), p["display_name"], queue_path=QUEUE)
             st.markdown("**Filmography**")
             st.dataframe(q("""SELECT t.year, t.title, tc.role, t.kind, t.kmi_funded
                               FROM title_credit tc JOIN title t ON t.id=tc.title_id
@@ -230,6 +270,7 @@ elif page == "🧑‍🎬 People & companies":
             st.subheader(co["name"])
             st.caption(f"{'SÍK member · ' if co['is_sik_member'] else ''}{co['website'] or ''}  ·  "
                        f"{co['kmi_grants_count']} grants / {isk(co['kmi_total_isk'])}")
+            flagging.flag_button(st, "company", int(co["id"]), co["name"], queue_path=QUEUE)
             raws = q("SELECT raw_string FROM alias WHERE entity_type='company' AND entity_id=? AND status='resolved'", (int(co["id"]),))
             if not raws.empty:
                 ph = ",".join("?" * len(raws))
@@ -273,37 +314,8 @@ elif page == "📐 Amounts & rebate":
 
 # ───────────────────────── Productions ↔ funding ─────────────────────────
 elif page == "🎞️ Productions ↔ funding":
-    st.title("Productions ↔ KMÍ funding")
-    st.caption("Icelandic films (Wikipedia) + series (kvikmyndir.is), cross-referenced with the "
-               "KMÍ ledger by title + year.")
-    st.info("**Coverage:** our grant ledger is only **2021–2024**. `matched` = a grant was found; "
-            "`likely_unfunded` = released 2022+ with no match (the real 'made without a grant' "
-            "signal); `ledger_gap` = older release whose grant era we don't have. Title-based "
-            "matching can miss grants given under a working title.")
-    try:
-        df = q("SELECT * FROM title WHERE source IN ('src.kvikmyndir_is','src.wikipedia_is')")
-    except Exception:
-        df = None
-    if df is None or df.empty:
-        st.warning("No productions yet — run `make kvik && make wiki-films && make build`.")
-    else:
-        m = st.columns(4)
-        m[0].metric("Titles", len(df))
-        m[1].metric("Matched to a grant", int((df["xref_status"] == "matched").sum()))
-        m[2].metric("Likely unfunded (2022+)", int((df["xref_status"] == "likely_unfunded").sum()))
-        m[3].metric("Ledger gap (pre-2021)", int((df["xref_status"] == "ledger_gap").sum()))
-        c1, c2, c3 = st.columns(3)
-        kind = c1.selectbox("Kind", ["All", "film", "series"])
-        status = c2.selectbox("Cross-ref status", ["All", "matched", "likely_unfunded", "ledger_gap"])
-        yr = c3.slider("From year", 1949, 2026, 2015)
-        f = df[df["year"].fillna(0) >= yr]
-        if kind != "All":
-            f = f[f["kind"] == kind]
-        if status != "All":
-            f = f[f["xref_status"] == status]
-        f = f.sort_values(["year", "title"], ascending=[False, True])
-        show = f[["title", "year", "kind", "director", "xref_status", "kmi_total_isk", "kmi_years_json", "match_confidence"]]
-        st.dataframe(show, use_container_width=True, hide_index=True)
+    # richer browse + clickable profile (deep-links via ?title_id=); flagging passed through
+    production_profile.render(st, DB, st.query_params)
 
 # ───────────────────────── Semantic search ─────────────────────────
 elif page == "🔎 Semantic search":
@@ -335,3 +347,13 @@ elif page == "🔎 Semantic search":
                 hits = [r for r in rows if query.lower() in r["text"].lower()][:k]
                 st.dataframe(pd.DataFrame([{"type": r["metadata"].get("type"), "text": r["text"]} for r in hits]),
                              use_container_width=True, hide_index=True)
+
+
+# ───────────────────────── Ask Bíómonsi (conversational text-to-SQL) ─────────────────────────
+elif page == "💬 Ask Bíómonsi":
+    if ask_biomonsi is None:
+        st.title("Spyrja Bíómonsi")
+        st.warning("`anthropic` pakkann vantar — `pip install anthropic` og settu `ANTHROPIC_API_KEY` "
+                   "í umhverfið til að virkja samtals-fyrirspurnir (read-only text-to-SQL).")
+    else:
+        ask_biomonsi.render(st, str(DB))
