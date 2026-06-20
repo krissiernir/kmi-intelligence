@@ -1,0 +1,17 @@
+# Ruff config — linter + formatter for the KMÍ pipeline. Run: `make lint` (or `make format`).
+target-version = "py312"
+line-length = 120
+extend-exclude = ["archive", "build", ".venv", ".venv-rag", ".venv-imdb", ".venv-er", ".venv-nlp", "data"]
+
+[lint]
+# pyflakes (F) + pycodestyle (E/W) + isort (I) + pyupgrade (UP) + bugbear (B) + comprehensions (C4)
+select = ["E", "F", "W", "I", "UP", "B", "C4"]
+ignore = [
+    "E741",  # ambiguous names l/r — used deliberately in Splink left/right comparisons
+    "B008",  # function calls in defaults — fine for our small CLIs
+    "E501",  # line-too-long — mostly inline SQL strings; not worth wrapping
+    "E702",  # multiple statements w/ semicolon — used in compact CLI/POC scripts
+]
+
+[lint.per-file-ignores]
+"**/__init__.py" = ["F401"]  # re-exports

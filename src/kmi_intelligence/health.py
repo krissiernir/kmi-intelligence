@@ -16,7 +16,7 @@ from __future__ import annotations
 import glob
 import json
 import sqlite3
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -168,7 +168,7 @@ def main() -> int:
     chk, cov, q, src, dft = checks(m), coverage(m), queues(m), sources_health(), drift(m)
     fails = sum(1 for s, *_ in chk if s == FAIL)
     warns = sum(1 for s, *_ in chk + src + dft if s == WARN)
-    now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    now = datetime.now(UTC).strftime("%Y-%m-%d %H:%M UTC")
 
     lines = [f"# KMÍ Intelligence — data health  ({now})", "",
              f"**{fails} failures · {warns} warnings** across grant core, spine, and corpus.", "",

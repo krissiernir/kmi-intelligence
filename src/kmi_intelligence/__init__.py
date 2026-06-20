@@ -10,6 +10,7 @@ Pipeline modules:
 The legacy integer-keyed MVP (db/seed/readiness/analysis/prompt_builder) was retired to
 archive/mvp-legacy/ — nothing here imports it.
 """
+from datetime import UTC
 
 __all__ = ["compile", "packs", "rag", "mcp_server", "log_event"]
 
@@ -24,7 +25,7 @@ def log_event(action: str, **fields) -> None:
         import json
         from datetime import datetime, timezone
         from pathlib import Path
-        rec = {"ts": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        rec = {"ts": datetime.now(UTC).isoformat(timespec="seconds"),
                "action": action, **fields}
         log = Path(__file__).resolve().parents[2] / "logs" / "activity.jsonl"
         log.parent.mkdir(exist_ok=True)

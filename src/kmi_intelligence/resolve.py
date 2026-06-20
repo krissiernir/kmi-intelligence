@@ -44,8 +44,8 @@ def _decided() -> set:
 
 def main() -> int:
     import pandas as pd
-    from splink import Linker, DuckDBAPI, SettingsCreator, block_on
     import splink.comparison_library as cl
+    from splink import DuckDBAPI, Linker, SettingsCreator, block_on
 
     c = sqlite3.connect(DB)
     comp = c.execute("SELECT id, name, name_norm, COALESCE(type,'?') type, COALESCE(is_sik_member,0) sik, "

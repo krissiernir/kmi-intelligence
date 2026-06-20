@@ -737,6 +737,7 @@ def main() -> int:
     kdir = ROOT / "data" / "raw" / "klapptre"
     if kdir.exists() and any(kdir.glob("*.json")):
         from .ingest import klapptre as kx  # lazy: core build never depends on Zone 3
+        from .ingest.textclean import to_text
         t_by_norm, p_by_norm = {}, {}
         for tid, nm in conn.execute("SELECT id, title FROM title"):
             n = _norm(nm)
@@ -779,7 +780,7 @@ def main() -> int:
                 "INSERT INTO corpus_article(id,source,ext_id,date,year,url,slug,title,categories_json,primary_category,tags_json,body_chars) "
                 "VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",
                 (art, "src.klapptre", a["id"], date, yr, a["link"], a["slug"], a["title"],
-                 json.dumps(a["cats"]), prim, json.dumps(a["tags"]), len(kx.to_text(a["html"]))))
+                 json.dumps(a["cats"]), prim, json.dumps(a["tags"]), len(to_text(a["html"]))))
             z3["articles"] += 1
             if kx.CAT["adsokn"] in cats:
                 scope = "WW" if _re.search(r"heimsv[ií]su|alþjóð|internationa", a["title"].lower()) else "IS"

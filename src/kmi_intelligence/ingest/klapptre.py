@@ -27,8 +27,6 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-from .textclean import to_text
-
 ROOT = Path(__file__).resolve().parents[3]
 OUT = ROOT / "data" / "raw" / "klapptre"
 INDEX = ROOT / "data" / "staged" / "klapptre_index.json"
