@@ -178,7 +178,7 @@ CREATE TABLE alias (
 CREATE TABLE corpus_article (
     id INTEGER PRIMARY KEY, source TEXT, ext_id INTEGER, date TEXT, year INTEGER,
     url TEXT, slug TEXT, title TEXT, categories_json TEXT, primary_category TEXT,
-    tags_json TEXT, body_chars INTEGER
+    tags_json TEXT, body_chars INTEGER, body TEXT
 );
 CREATE TABLE corpus_mention (
     article_id INTEGER, entity_type TEXT, entity_id INTEGER, raw_string TEXT,
@@ -826,11 +826,12 @@ def main() -> int:
             prim = next((kcats[c] for c in a["cats"] if c in kcats), None)
             ids["a"] += 1
             art = ids["a"]
+            body = to_text(a["html"])
             conn.execute(
-                "INSERT INTO corpus_article(id,source,ext_id,date,year,url,slug,title,categories_json,primary_category,tags_json,body_chars) "
-                "VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",
+                "INSERT INTO corpus_article(id,source,ext_id,date,year,url,slug,title,categories_json,primary_category,tags_json,body_chars,body) "
+                "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)",
                 (art, "src.klapptre", a["id"], date, yr, a["link"], a["slug"], a["title"],
-                 json.dumps(a["cats"]), prim, json.dumps(a["tags"]), len(to_text(a["html"]))))
+                 json.dumps(a["cats"]), prim, json.dumps(a["tags"]), len(body), body))
             z3["articles"] += 1
             if kx.CAT["adsokn"] in cats:
                 scope = "WW" if _re.search(r"heimsv[ií]su|alþjóð|internationa", a["title"].lower()) else "IS"
@@ -902,10 +903,10 @@ def main() -> int:
                 ids["a"] += 1
                 art = ids["a"]
                 conn.execute(
-                    "INSERT INTO corpus_article(id,source,ext_id,date,year,url,slug,title,categories_json,primary_category,tags_json,body_chars) "
-                    "VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",
+                    "INSERT INTO corpus_article(id,source,ext_id,date,year,url,slug,title,categories_json,primary_category,tags_json,body_chars,body) "
+                    "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)",
                     (art, "src.kmi_sitemap_mirror", None, p["date"], p["year"], None, p["name"], p["title"],
-                     json.dumps([p["section"]]), SECT.get(p["section"], p["section"]), json.dumps([]), len(p["text"])))
+                     json.dumps([p["section"]]), SECT.get(p["section"], p["section"]), json.dumps([]), len(p["text"]), p["text"]))
                 kp += 1
                 if p["section"] == "ahorf":
                     ym = _re.search(r"\b(20\d\d)\b", p["title"])          # CONTENT year (title), not publish

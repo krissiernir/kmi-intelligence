@@ -25,6 +25,7 @@ import argparse
 import hashlib
 import json
 import math
+import re
 import sqlite3
 from pathlib import Path
 
@@ -89,6 +90,15 @@ def build_chunks() -> int:
             f"Styrkleikamerki: {cr['evidence_examples']} Rauð flögg: {cr['red_flags']}",
             "metadata": {"type": "criterion", "id": cr["id"]}})
 
+    # corpus: chunk each article body (Klapptré 13-yr news + KMÍ news/culture) — the semantic layer
+    for a in c.execute("SELECT id, source, title, body, primary_category, date FROM corpus_article "
+                       "WHERE body IS NOT NULL AND TRIM(body)!=''"):
+        for i, part in enumerate(_split(a["body"])):
+            chunks.append({"id": f"corpus:{a['id']}:{i}",
+                           "text": f"{a['title']}. {part}" if i == 0 else part,
+                           "metadata": {"type": "corpus", "source": a["source"], "article_id": a["id"],
+                                        "category": a["primary_category"], "date": a["date"], "title": a["title"]}})
+
     # ledger: one chunk per real award (for "find similar funded projects")
     for a in c.execute("SELECT * FROM allocations WHERE amount_isk IS NOT NULL"):
         text = (f"{a['project_title']} ({a['year']}) — {a['family']} "
@@ -110,6 +120,19 @@ def build_chunks() -> int:
 # ---------------- pluggable embedders ----------------
 def _tokenize(s: str):
     return [t for t in "".join(ch.lower() if ch.isalnum() else " " for ch in s).split() if len(t) > 1]
+
+
+def _split(text: str, size: int = 900, overlap: int = 120):
+    """Split a long body into ~size-char chunks at sentence/line boundaries, with light overlap."""
+    out, cur = [], ""
+    for s in re.split(r"(?<=[.!?])\s+|\n+", text or ""):
+        if cur and len(cur) + len(s) > size:
+            out.append(cur.strip())
+            cur = (cur[-overlap:] + " ") if overlap else ""
+        cur += s + " "
+    if cur.strip():
+        out.append(cur.strip())
+    return out or [(text or "")[:size]]
 
 
 # Each backend takes (texts, kind) where kind is "passage" (documents, at index time)
