@@ -60,3 +60,82 @@ def strip_boilerplate(text: str, fragments: set[str]) -> str:
         if s.strip() not in fragments:
             out.append(s)
     return "\n".join(x for x in (l.strip() for l in out) if x)
+
+
+# ── Icelandic NLP (Miðeind: BÍN morphology + Greynir NER) ──────────────────────────────
+# LAZY + GRACEFUL: islenska/reynir live only in .venv-nlp. When absent (e.g. the stdlib core
+# build), every function degrades to identity/empty so nothing breaks. Singletons are cached.
+_NAME_PARTS = {"ism", "erm", "föð", "móð", "gæl"}  # BÍN 'hluti' tags for person-name pieces
+_bin = _greynir = None
+_bin_off = _greynir_off = False
+
+
+def _get_bin():
+    global _bin, _bin_off
+    if _bin is None and not _bin_off:
+        try:
+            from islenska import Bin
+            _bin = Bin()
+        except Exception:
+            _bin_off = True
+    return _bin
+
+
+def _get_greynir():
+    global _greynir, _greynir_off
+    if _greynir is None and not _greynir_off:
+        try:
+            from reynir import Greynir
+            _greynir = Greynir()
+        except Exception:
+            _greynir_off = True
+    return _greynir
+
+
+def nlp_available() -> bool:
+    return _get_bin() is not None
+
+
+def lemma(word: str) -> str:
+    """Inflected Icelandic word -> lemma (styrkjum -> styrkur). Identity if NLP unavailable."""
+    b = _get_bin()
+    if not b or not word:
+        return word
+    try:
+        res = b.lookup(word)
+        return res[1][0].ord if res[1] else word
+    except Exception:
+        return word
+
+
+def normalize_name(s: str) -> str:
+    """Person/proper name in any case -> nominative (Baltasars Kormáks -> Baltasar Kormákur).
+
+    Prefers BÍN person-name lemmas (hluti ∈ ism/erm/föð/…); falls back to the first lemma, then the
+    token. Returns the input unchanged when NLP is unavailable. Not perfect on rare names (fuzzy
+    match downstream absorbs the residue)."""
+    b = _get_bin()
+    if not b or not s:
+        return s
+    out = []
+    for tok in s.split():
+        try:
+            res = b.lookup(tok)
+            names = [e.ord for e in res[1] if getattr(e, "hluti", "") in _NAME_PARTS]
+            out.append(names[0] if names else (res[1][0].ord if res[1] else tok))
+        except Exception:
+            out.append(tok)
+    return " ".join(out)
+
+
+def entities(text: str) -> list[str]:
+    """Person/proper-noun mentions in `text`, returned in NOMINATIVE via Greynir NER.
+    Empty list if NLP unavailable. Good for content/term extraction + mention-linkage."""
+    g = _get_greynir()
+    if not g or not text:
+        return []
+    try:
+        s = g.parse_single(text)
+        return list(s.tree.persons) if (s and s.tree is not None) else []
+    except Exception:
+        return []

@@ -63,7 +63,14 @@ kmi-intelligence/
 └─ archive/mvp-legacy/        retired integer-keyed MVP (code + seed CSVs) — not used; see its README
 ```
 Virtualenvs (all gitignored): `.venv` (dashboard: streamlit+pandas), `.venv-rag` (py3.12: RAG +
-MCP SDK, `make embed-setup`/`mcp-setup`), `.venv-imdb` (py3.12: imdbinfo, `make imdb-setup`).
+MCP SDK, `make embed-setup`/`mcp-setup`), `.venv-imdb` (py3.12: imdbinfo, `make imdb-setup`),
+`.venv-er` (splink+pandas2+duckdb1.1, `make er-setup`), `.venv-nlp` (Miðeind BÍN+Greynir, `make nlp-setup`).
+
+Icelandic NLP (Miðeind) helpers live in `ingest/textclean.py` — `lemma()`, `normalize_name()`
+(genitive→nominative, e.g. *Baltasars Kormáks*→`Baltasar Kormákur`), `entities()` (Greynir NER →
+nominative). LAZY + graceful: they degrade to identity/empty when run outside `.venv-nlp`, so the
+stdlib core build never gains a hard dependency. Used for corpus mention→entity linkage, person-dedup,
+and lemma-based RAG.
 
 ## Database schema (`build/kmi.db`)
 TEXT-keyed. Built by `compile.py`.

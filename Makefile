@@ -1,6 +1,6 @@
 PYTHON ?= python3
 
-.PHONY: init run fetch parse kvik wiki-films producers klapptre imdb-datasets imdb-verify imdb-setup imdb-enrich imdb-resolve build packs health log er-setup resolve review embed embed-setup rag-search publish mcp mcp-setup all
+.PHONY: init run fetch parse kvik wiki-films producers klapptre imdb-datasets imdb-verify imdb-setup imdb-enrich imdb-resolve build packs health log er-setup resolve review nlp-setup embed embed-setup rag-search publish mcp mcp-setup all
 
 init:           ## install dashboard deps (streamlit/pandas) into the active env
 	$(PYTHON) -m pip install -r requirements.txt
@@ -52,6 +52,10 @@ log:            ## show recent pipeline activity (logs/activity.jsonl)
 er-setup:       ## one-time: dedicated ER venv (splink + pandas 2.x + duckdb 1.1, needs uv)
 	uv venv --python 3.12 .venv-er
 	VIRTUAL_ENV=.venv-er uv pip install "splink==4.0.16" "pandas==2.2.3" "duckdb==1.1.3" pyarrow
+
+nlp-setup:      ## one-time: Icelandic NLP venv (Miðeind BÍN + Greynir; needs uv)
+	uv venv --python 3.12 .venv-nlp
+	VIRTUAL_ENV=.venv-nlp uv pip install islenska tokenizer reynir icegrams
 
 resolve:        ## Splink: propose duplicate companies -> data/staged/merge_candidates.json
 	PYTHONPATH=src .venv-er/bin/python -m kmi_intelligence.resolve
