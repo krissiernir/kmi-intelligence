@@ -23,7 +23,7 @@ _CREDIT = re.compile(r"^\s*(mynd|ljósmynd|skjáskot|aðsend mynd)\s*[:/].*$", r
 
 def to_text(content_html: str) -> str:
     """Body HTML -> plain text, keeping table rows as 'a | b | c' and paragraphs as lines."""
-    h = content_html or ""
+    h = (content_html or "").replace("\xad", "")  # drop soft hyphens (KMÍ titles use them)
     h = _CAPTION.sub(" ", h)            # drop image captions (photo credits)
     h = _SHORTCODE.sub(" ", h)          # drop [usr]/[tble]/[column]… shortcodes
     h = re.sub(r"</t[dh]>", " | ", h, flags=re.I)

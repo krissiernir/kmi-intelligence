@@ -204,8 +204,8 @@
       "url": "https://www.kvikmyndamidstod.is/sitemap.xml",
       "source_type": "site_mirror",
       "local_path": "data/raw/site/",
-      "checked_at": "2026-06-19",
-      "notes": "Complete snapshot of all 342 KMÍ pages (html + text + manifest.json) via ingest/fetch.py --sitemap. Sections: kvikmyndamenning/frettir (~273 news → Zone 3 corpus), kvikmyndagerd (grants → Zone 1), um-kmi/tolulegar-upplysingar + ahorf (stats → Zone 2 lx_*). Selectively curated, not bulk-loaded. See docs/ARCHITECTURE-v3.md."
+      "checked_at": "2026-06-20",
+      "notes": "Full KMÍ site mirror (342 pages, .html+.txt). Parsed by ingest/kmi_site.py: áhorf/* annual TV-viewership tables -> lx_viewership (authoritative, confidence=verified, content-year from title); frettir/kvikmyndamenning/um/kvikmyndagerd pages -> corpus_article (Zone 3, content from <main id=\"main\">, nav stripped). Grant detail pages also drive Zone 1 (see src.kmi_* html sources)."
     },
     {
       "id": "src.imdb_datasets",

@@ -886,12 +886,47 @@ def main() -> int:
                 _mention(art, "person", pid_, subj or a["title"])
                 z3["awards"] += 1
 
-        conn.executemany(
-            "INSERT INTO corpus_mention(article_id,entity_type,entity_id,raw_string,method,confidence) VALUES(?,?,?,?,?,?)",
-            mentions)
         print(f"  Zone 3 (Klapptré): {z3['articles']} articles · {z3['admissions']} admissions · "
               f"{z3['viewership']} viewership · {z3['reviews']} reviews · {z3['awards']} awards · "
               f"{z3['mentions']} mentions")
+
+        # ---- KMÍ sitemap: news/culture corpus + áhorf viewership facts (src.kmi_sitemap_mirror) ----
+        sdir = ROOT / "data" / "raw" / "site"
+        if sdir.exists() and any(sdir.glob("*.html")):
+            from .ingest import kmi_site as ksite
+            SECT = {"ahorf": "Áhorf", "frettir": "Fréttir", "kvikmyndamenning": "Kvikmyndamenning",
+                    "um": "Um KMÍ", "kvikmyndagerd": "Kvikmyndagerð", "other": "KMÍ"}
+            kp = kv = 0
+            for p in ksite.iter_pages():
+                ids["a"] += 1
+                art = ids["a"]
+                conn.execute(
+                    "INSERT INTO corpus_article(id,source,ext_id,date,year,url,slug,title,categories_json,primary_category,tags_json,body_chars) "
+                    "VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",
+                    (art, "src.kmi_sitemap_mirror", None, p["date"], p["year"], None, p["name"], p["title"],
+                     json.dumps([p["section"]]), SECT.get(p["section"], p["section"]), json.dumps([]), len(p["text"])))
+                kp += 1
+                if p["section"] == "ahorf":
+                    ym = _re.search(r"\b(20\d\d)\b", p["title"])          # CONTENT year (title), not publish
+                    vyear = int(ym.group(1)) if ym else p["year"]
+                    for r in ksite.parse_viewership(p["main_html"]):
+                        t = _re.sub(r"\*+$", "", r["title"] or "").strip()  # "Brot**" -> "Brot"
+                        if not t or t.startswith("*") or "meðaláhorf" in t.lower() or len(t) > 60:
+                            continue                                       # footnote / junk row
+                        tid = _res_title(t)
+                        ids["view"] += 1
+                        conn.execute(
+                            "INSERT INTO lx_viewership(id,title_id,title_text,channel,date,year,viewers,rating_pct,episodes,article_id,source,confidence) "
+                            "VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",
+                            (ids["view"], tid, t, r["channel"], p["date"], vyear, r["viewers"],
+                             r["rating_pct"], r["episodes"], art, "src.kmi_sitemap_mirror", "verified"))
+                        _mention(art, "title", tid, t)
+                        kv += 1
+            print(f"  Zone 3 (KMÍ site): {kp} pages → corpus + {kv} áhorf viewership rows")
+
+        conn.executemany(
+            "INSERT INTO corpus_mention(article_id,entity_type,entity_id,raw_string,method,confidence) VALUES(?,?,?,?,?,?)",
+            mentions)
 
     # ---- reference: Icelandic↔English domain lexicon ----
     lex_path = ROOT / "data" / "curated" / "lexicon.json"
