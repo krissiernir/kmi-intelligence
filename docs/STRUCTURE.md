@@ -169,6 +169,11 @@ HTML (drops shortcodes/captions + frequency-detected boilerplate). The Zone 3 bu
   Verðlaun(win)/Tilnefningar(nomination). **575** rows.
 Run `make klapptre` to refresh; `KMI_CATS=all` mirrors the whole site (later RAG phase).
 
+### Reference — domain lexicon
+- **lexicon**(`id` PK, term_is, term_en, category, literal, note, src) — **294** Icelandic↔English
+  domain terms in 14 categories (`src.lexicon`, from `data/curated/lexicon.json`). Pure reference
+  (zone-agnostic) for prompting + Icelandic NLP term work; compiled in `db-import-staging/`.
+
 ## Common queries
 ```sql
 -- A grant's full requirements

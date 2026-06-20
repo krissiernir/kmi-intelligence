@@ -176,6 +176,11 @@ CREATE TABLE lx_award (
     award_hint TEXT, date TEXT, year INTEGER, headline TEXT, article_id INTEGER, source TEXT, confidence TEXT
 );
 
+-- reference: Icelandic↔English domain lexicon (pure reference, zone-agnostic)
+CREATE TABLE lexicon (
+    id INTEGER PRIMARY KEY, term_is TEXT, term_en TEXT, category TEXT, literal TEXT, note TEXT, src TEXT
+);
+
 CREATE VIEW productions AS SELECT * FROM title;
 
 CREATE INDEX idx_streams_family ON grant_streams(family);
@@ -837,6 +842,16 @@ def main() -> int:
         print(f"  Zone 3 (Klapptré): {z3['articles']} articles · {z3['admissions']} admissions · "
               f"{z3['viewership']} viewership · {z3['reviews']} reviews · {z3['awards']} awards · "
               f"{z3['mentions']} mentions")
+
+    # ---- reference: Icelandic↔English domain lexicon ----
+    lex_path = ROOT / "data" / "curated" / "lexicon.json"
+    if lex_path.exists():
+        lex = json.loads(lex_path.read_text(encoding="utf-8")).get("terms", [])
+        conn.executemany(
+            "INSERT INTO lexicon(term_is,term_en,category,literal,note,src) VALUES(?,?,?,?,?,?)",
+            [(t.get("is"), t.get("en"), t.get("category"), t.get("literal"), t.get("note"), t.get("src"))
+             for t in lex])
+        print(f"  lexicon: {len(lex)} terms")
 
     conn.commit()
 

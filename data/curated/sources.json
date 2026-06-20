@@ -141,7 +141,8 @@
       "source_type": "web",
       "local_path": "data/raw/html/handrit_leiknar.html",
       "content_sha256": "58e9eff5ce3ebcc6",
-      "fetched_at": "2026-06-19", "checked_at": "2026-06-19",
+      "fetched_at": "2026-06-19",
+      "checked_at": "2026-06-19",
       "notes": "Authoritative current amounts: 1./2. handritsstyrkur 1.5M each, 1.+2. samtímis 3.0M. Includes reyndur höfundur/framleiðandi definitions."
     },
     {
@@ -151,7 +152,8 @@
       "source_type": "web",
       "local_path": "data/raw/html/handrit_sjonvarp.html",
       "content_sha256": "7fe62db2aa9f2c2b",
-      "fetched_at": "2026-06-19", "checked_at": "2026-06-19",
+      "fetched_at": "2026-06-19",
+      "checked_at": "2026-06-19",
       "notes": "Current amounts: I/II 1.5M, III 3.0M; total screenwriting cap 3.0M per project."
     },
     {
@@ -161,7 +163,8 @@
       "source_type": "web",
       "local_path": "data/raw/html/throun_framleidsla_leikid.html",
       "content_sha256": "af9f60a681846743",
-      "fetched_at": "2026-06-19", "checked_at": "2026-06-19",
+      "fetched_at": "2026-06-19",
+      "checked_at": "2026-06-19",
       "notes": "Development & production amounts: 'Upphæð fer eftir umfangi verkefnis' (scope-dependent, no fixed cap). 2. þróunarstyrkur only for projects with a production-grant vilyrði."
     },
     {
@@ -171,7 +174,8 @@
       "source_type": "web",
       "local_path": "data/raw/html/framleidslustyrkir.html",
       "content_sha256": "1b598b41bff2ec2c",
-      "fetched_at": "2026-06-19", "checked_at": "2026-06-19",
+      "fetched_at": "2026-06-19",
+      "checked_at": "2026-06-19",
       "notes": "Production amounts scope-dependent; processing 10-12 weeks."
     },
     {
@@ -181,7 +185,8 @@
       "source_type": "web",
       "local_path": "data/raw/html/eftirvinnslustyrkir.html",
       "content_sha256": "6b52c09524a6daa6",
-      "fetched_at": "2026-06-19", "checked_at": "2026-06-19",
+      "fetched_at": "2026-06-19",
+      "checked_at": "2026-06-19",
       "notes": "Post-production Hámarksupphæð 15.000.000 kr."
     },
     {
@@ -272,6 +277,15 @@
       "local_path": "data/raw/manual/",
       "checked_at": "2026-05-30",
       "notes": "User's pre-existing curated grant data (Styrkir Json/, kmi_grants_db.json, kmi_deliverables.json). High quality but unverified against the live source; treat as needs_verification until cross-checked."
+    },
+    {
+      "id": "src.lexicon",
+      "title": "KMÍ domain lexicon (Icelandic↔English), compiled",
+      "url": "data/curated/lexicon.json",
+      "source_type": "reference",
+      "local_path": "data/curated/lexicon.json",
+      "checked_at": "2026-06-20",
+      "notes": "294 domain terms in 14 categories (is/en + category/literal/note). Compiled in db-import-staging from the academic theses + KMÍ/Klapptré/producers.is scrapes; each term carries a src label. Pure reference for prompting + Icelandic NLP term work. No collisions with any table."
     }
   ]
 }
