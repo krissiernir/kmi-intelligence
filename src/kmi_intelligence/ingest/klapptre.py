@@ -117,6 +117,9 @@ def main() -> int:
 
     INDEX.write_text(json.dumps(index, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"\n{len(index)} posts indexed ({fetched} written, {skipped} cached) -> {INDEX.relative_to(ROOT)}")
+    from .. import log_event
+    log_event("ingest.klapptre", posts=len(index), written=fetched, cached=skipped,
+              scope=("all" if want_all else "fact_cats"))
     return 0
 
 

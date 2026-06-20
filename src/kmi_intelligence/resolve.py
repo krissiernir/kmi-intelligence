@@ -93,6 +93,8 @@ def main() -> int:
     CAND.write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"wrote {len(out)} undecided candidate pairs (>= {THRESHOLD}) -> {CAND.relative_to(ROOT)}")
     print("review them: `make review`  (writes data/curated/entity_merges.json; applied by `make build`)")
+    from . import log_event
+    log_event("resolve", candidates=len(out), companies=len(df))
     return 0
 
 

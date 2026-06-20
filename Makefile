@@ -1,6 +1,6 @@
 PYTHON ?= python3
 
-.PHONY: init run fetch parse kvik wiki-films producers klapptre imdb-datasets imdb-verify imdb-setup imdb-enrich imdb-resolve build packs health er-setup resolve review embed embed-setup rag-search publish mcp mcp-setup all
+.PHONY: init run fetch parse kvik wiki-films producers klapptre imdb-datasets imdb-verify imdb-setup imdb-enrich imdb-resolve build packs health log er-setup resolve review embed embed-setup rag-search publish mcp mcp-setup all
 
 init:           ## install dashboard deps (streamlit/pandas) into the active env
 	$(PYTHON) -m pip install -r requirements.txt
@@ -45,6 +45,9 @@ packs:          ## build/kmi.db -> build/prompt_packs/
 
 health:         ## data-health cockpit -> build/HEALTH.md (coverage, queues, drift vs last run)
 	$(PYTHON) -m src.kmi_intelligence.health
+
+log:            ## show recent pipeline activity (logs/activity.jsonl)
+	@$(PYTHON) -c "import json,pathlib;p=pathlib.Path('logs/activity.jsonl');rows=[json.loads(l) for l in p.read_text().splitlines()] if p.exists() else [];[print(r['ts'],' ',r['action'].ljust(16),{k:v for k,v in r.items() if k not in('ts','action')}) for r in rows[-25:]];print('(no activity logged yet)') if not rows else None"
 
 er-setup:       ## one-time: dedicated ER venv (splink + pandas 2.x + duckdb 1.1, needs uv)
 	uv venv --python 3.12 .venv-er

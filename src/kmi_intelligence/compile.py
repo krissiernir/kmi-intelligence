@@ -18,6 +18,8 @@ import sqlite3
 import sys
 from pathlib import Path
 
+from . import log_event
+
 ROOT = Path(__file__).resolve().parents[2]
 CURATED = ROOT / "data" / "curated"
 BUILD = ROOT / "build"
@@ -861,6 +863,10 @@ def main() -> int:
         print(f"\n{len(warnings)} warning(s):")
         for w in warnings[:30]:
             print("  WARN", w)
+    if count("title"):
+        log_event("build", allocations=count("allocations"), titles=count("title"),
+                  people=count("person"), credits=count("title_credit"), companies=count("company"),
+                  corpus=count("corpus_article"), warnings=len(warnings))
     conn.close()
     return 0
 

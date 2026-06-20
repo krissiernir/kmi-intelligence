@@ -98,6 +98,8 @@ def run_datasets() -> int:
                          "crew_total": sum(len(v) for v in credits.values())})
     (OUT_DS / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"wrote {len(manifest)} title files -> {OUT_DS.relative_to(ROOT)}")
+    from .. import log_event
+    log_event("imdb.datasets", titles=len(manifest), people=len(nconsts))
     return 0
 
 
@@ -141,6 +143,8 @@ def run_verify() -> int:
     for s in suspects[:40]:
         print(f"  {s.get('status')}: {s['tconst']} ours={s['our_title']!r}"
               + (f" vs IMDb={s.get('imdb_title')!r}" if s.get("imdb_title") else ""))
+    from .. import log_event
+    log_event("imdb.verify", checked=len(report), suspects=len(suspects))
     return 0
 
 
@@ -213,6 +217,8 @@ def run_enrich() -> int:
     (OUT_FULL / "manifest_full.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
     (OUT_FULL / "failures.json").write_text(json.dumps(failures, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"done={done} skipped={skipped} failed={len(failures)} of {len(tconsts)}")
+    from .. import log_event
+    log_event("imdb.enrich", enriched=done, skipped=skipped, failed=len(failures))
     return 0
 
 
@@ -281,6 +287,8 @@ def run_resolve() -> int:
     LINKS.write_text(json.dumps(links, ensure_ascii=False, indent=2), encoding="utf-8")
     REVIEW.write_text(json.dumps(review, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"accepted {accepted} new links (total {len(links)}); parked {len(review)} for review")
+    from .. import log_event
+    log_event("imdb.resolve", accepted=accepted, total_links=len(links), review=len(review))
     return 0
 
 
