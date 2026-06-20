@@ -134,6 +134,11 @@ TEXT-keyed. Built by `compile.py`.
 - **alias**(entity_type [company|title], raw_string, raw_norm, entity_id, source, match_method,
   confidence, status) — **907** resolution-log rows. ER policy: strong-key/exact-norm auto-link;
   fuzzy candidates park `status='unresolved'` (33) for human review — **never silently merged**.
+  Probabilistic dedup: `resolve.py` (Splink, in `.venv-er`; `make resolve`) scores company duplicates
+  on name + **shared films** + type → `data/staged/merge_candidates.json`. You confirm/reject in a
+  one-page UI (`app/review.py`, `make review`) → `data/curated/entity_merges.json` (committed source
+  of truth), which `compile.py` applies at build (dropped name collapses into the canonical, logged in
+  `alias` as `match_method='manual_merge'`). Strong-key links (IMDb conmst) stay deterministic.
 
 Ingesters: `ingest/{kvikmyndir,wikipedia_films,producers_is}.py` + `ingest/imdb.py` (one module,
 subcommands `datasets|enrich|verify|resolve`). The IMDb fold (B4) lives in `compile.py`, reading

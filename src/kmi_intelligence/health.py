@@ -103,12 +103,21 @@ def coverage(m: dict) -> list[str]:
     ]
 
 
+def _jlen(p, key=None):
+    if not p.exists():
+        return 0
+    d = json.loads(p.read_text())
+    return len(d.get(key, [])) if key else len(d)
+
+
 def queues(m: dict) -> list[str]:
-    rev = ROOT / "data" / "staged" / "imdb_resolve_review.json"
-    n_rev = len(json.loads(rev.read_text())) if rev.exists() else 0
+    cand = ROOT / "data" / "staged" / "merge_candidates.json"
+    mrg = ROOT / "data" / "curated" / "entity_merges.json"
     return [
-        f"Unresolved entity aliases (need a human merge/keep call): {m.get('alias_unresolved')}",
-        f"Parked tconst candidates (data/staged/imdb_resolve_review.json): {n_rev}",
+        f"Splink merge candidates to review (run `make review`): {_jlen(cand)}",
+        f"  ↳ confirmed merges applied: {_jlen(mrg,'merges')} · kept-separate: {_jlen(mrg,'rejected')}",
+        f"Unresolved entity aliases (legacy fuzzy queue): {m.get('alias_unresolved')}",
+        f"Parked tconst candidates (imdb_resolve_review.json): {_jlen(ROOT/'data'/'staged'/'imdb_resolve_review.json')}",
         f"Allocations with no amount (vilyrði-only / parse gap): {m.get('alloc_no_amount')}",
     ]
 

@@ -416,9 +416,20 @@ def main() -> int:
         t = _re.sub(r"\(.*?\)", " ", (t or "").lower())
         return _re.sub(r"\s+", " ", _re.sub(r"[^0-9a-záéíóúýþæöð]+", " ", t)).strip()
 
-    def _cnorm(s):  # company norm (drops legal suffixes)
+    # human-confirmed company merges (from the review UI) collapse duplicates at build time
+    merges_path = ROOT / "data" / "curated" / "entity_merges.json"
+    _merge_redirect, _merge_log = {}, []
+    if merges_path.exists():
+        _md = json.loads(merges_path.read_text(encoding="utf-8"))
+        for m in _md.get("merges", []):
+            for drop in m.get("drop", []):
+                _merge_redirect[drop] = m["keep"]
+                _merge_log.append((m["keep"], drop, m.get("drop_name", drop), m.get("reason", "")))
+
+    def _cnorm(s):  # company norm (drops legal suffixes); applies confirmed merges
         s = _re.sub(r"\b(ehf|slf|sf|hf|ses)\b", " ", (s or "").lower())
-        return _re.sub(r"\s+", " ", _re.sub(r"[^0-9a-záéíóúýþæöð]+", " ", s)).strip()
+        base = _re.sub(r"\s+", " ", _re.sub(r"[^0-9a-záéíóúýþæöð]+", " ", s)).strip()
+        return _merge_redirect.get(base, base)
 
     def _people(s):  # split a credit field into individual names
         for part in _re.split(r"\s*[,/&]\s*|\s+og\s+", s or ""):
@@ -479,6 +490,12 @@ def main() -> int:
              r["n"], r["isk"], json.dumps(sorted(r["years"])), ent.get("source"), ent.get("confidence")),
         )
     company_by_norm = {n: e["id"] for n, e in companies.items()}
+    # log confirmed merges (the dropped name now resolves to the canonical company)
+    for keep_norm, drop_norm, drop_name, reason in _merge_log:
+        cid_keep = company_by_norm.get(keep_norm)
+        if cid_keep:
+            aliases.append(("company", drop_name, drop_norm, cid_keep, "entity_merges",
+                            "manual_merge", "verified", "resolved"))
 
     # ---- titles: production catalog + every allocation project ----
     title_reg = {}     # title_norm -> title_id

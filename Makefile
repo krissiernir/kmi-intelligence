@@ -1,6 +1,6 @@
 PYTHON ?= python3
 
-.PHONY: init run fetch parse kvik wiki-films producers klapptre imdb-datasets imdb-verify imdb-setup imdb-enrich imdb-resolve build packs health embed embed-setup rag-search publish mcp mcp-setup all
+.PHONY: init run fetch parse kvik wiki-films producers klapptre imdb-datasets imdb-verify imdb-setup imdb-enrich imdb-resolve build packs health er-setup resolve review embed embed-setup rag-search publish mcp mcp-setup all
 
 init:           ## install dashboard deps (streamlit/pandas) into the active env
 	$(PYTHON) -m pip install -r requirements.txt
@@ -45,6 +45,16 @@ packs:          ## build/kmi.db -> build/prompt_packs/
 
 health:         ## data-health cockpit -> build/HEALTH.md (coverage, queues, drift vs last run)
 	$(PYTHON) -m src.kmi_intelligence.health
+
+er-setup:       ## one-time: dedicated ER venv (splink + pandas 2.x + duckdb 1.1, needs uv)
+	uv venv --python 3.12 .venv-er
+	VIRTUAL_ENV=.venv-er uv pip install "splink==4.0.16" "pandas==2.2.3" "duckdb==1.1.3" pyarrow
+
+resolve:        ## Splink: propose duplicate companies -> data/staged/merge_candidates.json
+	PYTHONPATH=src .venv-er/bin/python -m kmi_intelligence.resolve
+
+review:         ## one-page UI to confirm/reject merges -> data/curated/entity_merges.json
+	$(UI_PY) -m streamlit run app/review.py
 
 EMBED_PY ?= .venv-rag/bin/python
 EMBED_BACKEND ?= local        # local | hash | openai | voyage

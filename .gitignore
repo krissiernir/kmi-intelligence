@@ -9,6 +9,7 @@ db/*.db
 .venv/
 .venv-rag/
 .venv-imdb/
+.venv-er/
 
 # --- OS / editor cruft ---
 .DS_Store
