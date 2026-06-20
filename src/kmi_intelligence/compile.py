@@ -459,6 +459,30 @@ def main() -> int:
         t = _re.sub(r"\(.*?\)", " ", (t or "").lower())
         return _re.sub(r"\s+", " ", _re.sub(r"[^0-9a-záéíóúýþæöð]+", " ", t)).strip()
 
+    def _clean_title(raw):
+        """(canonical, [former_titles]). Pulls '(áður X)' working-title changes out as data, not noise:
+        a project's title evolution (e.g. 'Love Odyssey' -> 'Eternal'). Handles a truncated '(áður'."""
+        t = (raw or "").strip()
+        formers = []
+        m = _re.search(r"\s*\(\s*áður:?\s*(.*)$", t, _re.I)
+        if m:
+            t = t[:m.start()].strip()
+            former = _re.split(r"\)", m.group(1))[0].strip()   # former name = up to the closing paren
+            if len(former) > 1:
+                formers.append(former)
+        return t.strip(" -–—"), formers
+
+    def _is_admin_blob(raw):
+        """An 'annað' grant whose whole description landed in project_title — travel/festival/premiere/
+        screening/operating support (e.g. 'Noumena ehf. Ferðastyrkur: Þátttaka í Nordisk Panorama 2024',
+        'Berdreymi Join Motion Pictures ehf. Berlinale'). NOT a production. A company suffix mid-string
+        ('… ehf. …') or any of these grant keywords marks it; the real film (if any) exists separately."""
+        low = (raw or "").lower()
+        return len(raw or "") > 45 and bool(_re.search(
+            r"ferðastyrk|þátttak|styrkur til |vinnustof|vinnusmið|ferð og þátttök|þáttt[:.]| lab\b|"
+            r"workshop|festival|kvikmyndahát|frumsýning|sýningarstyrk|green producers|kolefni|"
+            r"óskarsverðlaun|starfsemi|\behf\.|\bohf\.|\bslf\.|\bses\b", low))
+
     # human-confirmed merges (from the review UI) collapse duplicates at build time.
     # Format: {"company": {merges:[{keep,drop,...}]}, "person": {...}}  (old flat = company-only).
     merges_path = ROOT / "data" / "curated" / "entity_merges.json"
@@ -592,10 +616,11 @@ def main() -> int:
             # "no record" (could be a match miss or a stream we lack); a pre-2021 title is simply
             # before our window — funding status genuinely UNKNOWN (older script grants existed).
             xref = "matched" if matches else ("no_record_in_window" if (py and py >= 2021) else "before_window")
+            ptitle, pformers = _clean_title(p.get("title"))
             cur = conn.execute(
                 "INSERT INTO title(kvik_id,imdb_tconst,title,year,kind,status,director,where_shown_json,og_type,url,source,kmi_funded,kmi_alloc_count,kmi_total_isk,kmi_years_json,match_confidence,xref_status,matched_json) "
                 "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                (p.get("kvik_id"), tconst, p.get("title"), py, p.get("kind"), p.get("status"), p.get("director"),
+                (p.get("kvik_id"), tconst, ptitle, py, p.get("kind"), p.get("status"), p.get("director"),
                  json.dumps(p.get("where_shown", []), ensure_ascii=False), p.get("og_type_hint"), p.get("url"), p.get("source"),
                  1 if matches else 0, len(matches), sum(m["amount_isk"] for m in matches),
                  json.dumps(sorted({m["year"] for m in matches if m["year"]})), conf, xref,
@@ -603,17 +628,28 @@ def main() -> int:
             tid = cur.lastrowid
             if npn and npn not in title_reg:
                 title_reg[npn] = tid
+            for fmr in pformers:                 # working-title history: former name + when (the title's year)
+                aliases.append(("title", fmr, _norm(fmr), tid, f"{p.get('source')}#{py}", "former_title", "high", "resolved"))
             if p.get("director"):
                 prod_dirs.append((tid, p.get("director")))
 
-    for npn, a in alloc_idx:  # every allocation project becomes a title (resolve or create)
-        if npn not in title_reg:
-            cur = conn.execute(
-                "INSERT INTO title(title,year,kind,source,kmi_funded,match_confidence,xref_status,confidence) "
-                "VALUES(?,?,?,?,1,'high','matched','needs_verification')",
-                (a["project_title"], a["year"], KIND.get(a["format_track"]), "src.uthlutanir"))
-            title_reg[npn] = cur.lastrowid
-            aliases.append(("title", a["project_title"], npn, cur.lastrowid, "src.uthlutanir", "self", "high", "resolved"))
+    for npn, a in alloc_idx:  # most allocation projects become a title (resolve or create)
+        if npn in title_reg:
+            continue
+        # Travel/participation/misc 'annað' grants are NOT productions — their whole description landed
+        # in project_title. Keep them as allocation DATA (queryable funding history) but don't mint a
+        # garbled film title. The allocation row is untouched; we just skip the title/award edge.
+        if a["family"] == "annad" and _is_admin_blob(a["project_title"]):
+            continue
+        canon, formers = _clean_title(a["project_title"])
+        cur = conn.execute(
+            "INSERT INTO title(title,year,kind,source,kmi_funded,match_confidence,xref_status,confidence) "
+            "VALUES(?,?,?,?,1,'high','matched','needs_verification')",
+            (canon, a["year"], KIND.get(a["format_track"]), "src.uthlutanir"))
+        title_reg[npn] = cur.lastrowid
+        aliases.append(("title", a["project_title"], npn, cur.lastrowid, "src.uthlutanir", "self", "high", "resolved"))
+        for fmr in formers:                  # working-title history: former name + when (allocation year)
+            aliases.append(("title", fmr, _norm(fmr), cur.lastrowid, f"src.uthlutanir#{a['year']}", "former_title", "high", "resolved"))
 
     # ---- award: title-resolved view of every allocation ----
     for a in allocs:
