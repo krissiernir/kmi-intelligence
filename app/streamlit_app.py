@@ -136,20 +136,23 @@ elif page == "🎬 Grant browser":
                        format_func=lambda i: streams.loc[streams["id"] == i, "name_is"].iloc[0])
     s = streams[streams["id"] == sid].iloc[0]
 
+    def _has(v):  # NULLs read back from pandas as NaN (a float) — NaN is truthy, so guard explicitly
+        return pd.notna(v) and str(v).strip() not in ("", "None")
+
     st.subheader(s["name_is"])
-    if s["name_en"]:
-        st.caption(s["name_en"])
+    if _has(s["name_en"]):
+        st.caption(str(s["name_en"]))
     c = st.columns(3)
-    c[0].metric("Application max", isk(s["max_amount_isk"]) if s["max_amount_isk"] else "scope-dependent")
+    c[0].metric("Application max", isk(s["max_amount_isk"]) if _has(s["max_amount_isk"]) else "scope-dependent")
     c[1].metric("Stage", s["stage"])
     c[2].metric("Gátta ID", s["gatta_id"] or "—")
-    if s["purpose"]:
-        st.write("**Markmið:** " + s["purpose"])
-    if s["amount_basis"]:
-        st.caption("💡 " + s["amount_basis"])
-    if s["payment_split"]:
-        st.write("**Greiðsluskipting:** " + s["payment_split"])
-    if s["portal_url"]:
+    if _has(s["purpose"]):
+        st.write("**Markmið:** " + str(s["purpose"]))
+    if _has(s["amount_basis"]):
+        st.caption("💡 " + str(s["amount_basis"]))
+    if _has(s["payment_split"]):
+        st.write("**Greiðsluskipting:** " + str(s["payment_split"]))
+    if _has(s["portal_url"]):
         st.write(f"**Apply:** [{s['portal_url']}]({s['portal_url']})")
     rules = json.loads(s["rules_json"] or "{}")
     if rules:
