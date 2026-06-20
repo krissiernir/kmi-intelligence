@@ -787,6 +787,7 @@ def main() -> int:
     if kdir.exists() and any(kdir.glob("*.json")):
         from .ingest import klapptre as kx  # lazy: core build never depends on Zone 3
         from .ingest.textclean import to_text
+        kcats = kx.load_categories()  # full id->name map (all categories on a KMI_CATS=all mirror)
         t_by_norm, p_by_norm = {}, {}
         for tid, nm in conn.execute("SELECT id, title FROM title"):
             n = _norm(nm)
@@ -822,7 +823,7 @@ def main() -> int:
             cats = set(a["cats"])
             date = a["date"]
             yr = int(date[:4]) if date[:4].isdigit() else None
-            prim = next((kx.CAT_NAMES[c] for c in a["cats"] if c in kx.CAT_NAMES), None)
+            prim = next((kcats[c] for c in a["cats"] if c in kcats), None)
             ids["a"] += 1
             art = ids["a"]
             conn.execute(

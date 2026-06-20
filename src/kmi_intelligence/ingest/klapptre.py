@@ -40,6 +40,18 @@ FACT_CATS = {108: "Aðsóknartölur", 1423: "Áhorfstölur", 106: "Gagnrýni",
 CAT = {"adsokn": 108, "ahorf": 1423, "review": 106, "award": 160, "nomination": 161}
 CAT_NAMES = dict(FACT_CATS)
 
+
+def load_categories() -> dict:
+    """id -> category name, derived from the staged index (populated on a KMI_CATS=all run).
+    Falls back to the 5 fact-category names when the full index isn't present."""
+    m = dict(CAT_NAMES)
+    if INDEX.exists():
+        for a in json.loads(INDEX.read_text(encoding="utf-8")):
+            for cid, nm in zip(a.get("categories", []), a.get("category_names", [])):
+                if isinstance(nm, str) and not nm.isdigit():
+                    m[cid] = nm
+    return m
+
 AWARD_HINTS = ["Edduverðlaun", "Eddan", "Edda", "Óskarsverðlaun", "Óskar", "Oscar", "Academy Award",
                "Golden Globe", "BAFTA", "Emmy", "Guldbagge", "Nordisk", "Cannes", "Berlin", "Berlinale",
                "Sundance", "Venice", "Feneyja", "Karlovy", "Tribeca", "Goya", "Grímuna", "Gríman",
