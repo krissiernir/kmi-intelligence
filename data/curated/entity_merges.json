@@ -1,5 +1,5 @@
 {
-  "_about": "Human-confirmed entity merges, applied by compile.py. {company,person}.{merges,rejected}; dropped norms collapse into keep.",
+  "_about": "Human-confirmed entity merges, applied by compile.py. {company,person,title}.{merges,rejected}; dropped norms collapse into keep. For titles, a dropped (former/variant) name is preserved as an alias DATA POINT (surfaced as 'einnig þekkt sem'), never a forked duplicate.",
   "company": {
     "merges": [
       {
@@ -1442,6 +1442,38 @@
       [
         "hlín jóhannesdóttir",
         "hlín jóhannesdóttir arnar benjamín kristjánsson"
+      ]
+    ]
+  },
+  "title": {
+    "merges": [
+      {
+        "keep": "lói þú flýgur aldrei einn",
+        "drop": [
+          "lói",
+          "lói þú flýgur aldrei einn gunhil ehf"
+        ],
+        "keep_name": "Lói - Þú flýgur aldrei einn",
+        "drop_name": "Lói",
+        "reason": "user-confirmed rename: working title 'Lói' (2015 dev grant) → 'Lói - Þú flýgur aldrei einn' (2018, tt2766104). Same animated film (Árni Ólafur Ásgeirsson)."
+      }
+    ],
+    "rejected": [
+      [
+        "svörtu sandar",
+        "svörtu sandar 2"
+      ],
+      [
+        "stella blómkvist",
+        "stella blómkvist ii"
+      ],
+      [
+        "pabbahelgar",
+        "pabbahelgar 2"
+      ],
+      [
+        "hross í oss",
+        "kona fer í stríð"
       ]
     ]
   }

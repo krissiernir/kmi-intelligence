@@ -104,12 +104,17 @@ def _profile(st, db_path, qp, tid, flagging=None):
     st.caption(f"{KIND_IS.get(t['kind'], t['kind'])} · {int(t['year']) if pd.notna(t['year']) else '—'}"
                f"{' · ' + t['director'] if t['director'] else ''}")
     # working-title history — a project's title evolution, dated from the allocation it appeared in
-    former = _q(db_path, "SELECT raw_string, source FROM alias WHERE entity_type='title' "
-                "AND match_method='former_title' AND entity_id=?", (tid,))
+    former = _q(db_path, "SELECT DISTINCT raw_string, source FROM alias WHERE entity_type='title' "
+                "AND match_method IN ('former_title','renamed_to') AND entity_id=?", (tid,))
     if not former.empty:
-        names = ", ".join(f"{r.raw_string}" + (f" (≤{r.source.split('#')[-1]})" if "#" in str(r.source) else "")
-                          for r in former.itertuples())
-        st.caption(f"📝 Áður vinnuheiti: {names}")
+        seen, parts = set(), []
+        for r in former.itertuples():
+            nm = (r.raw_string or "").strip()
+            if nm and nm.lower() not in seen and nm.lower() != str(t["title"]).lower():
+                seen.add(nm.lower())
+                parts.append(nm + (f" ({r.source.split('#')[-1]})" if "#" in str(r.source) else ""))
+        if parts:
+            st.caption("📝 Einnig þekkt sem: " + ", ".join(parts))
 
     m = st.columns(4)
     m[0].metric("KMÍ alls", _isk(t["kmi_total_isk"]))

@@ -488,6 +488,7 @@ def main() -> int:
     merges_path = ROOT / "data" / "curated" / "entity_merges.json"
     _merge_redirect, _merge_log = {}, []        # company: norm -> keep_norm, + alias log
     _person_redirect, _person_merge_log = {}, []  # person:  norm -> keep_norm, + alias log
+    _title_redirect, _title_merge_log = {}, []  # title:   norm -> keep_norm, + alias log
     if merges_path.exists():
         _md = json.loads(merges_path.read_text(encoding="utf-8"))
         for m in (_md.get("company", {}).get("merges", []) or _md.get("merges", [])):
@@ -498,6 +499,12 @@ def main() -> int:
             for drop in m.get("drop", []):
                 _person_redirect[drop] = m["keep"]
                 _person_merge_log.append((m["keep"], drop, m.get("drop_name", drop), m.get("keep_name", m["keep"])))
+        # title merges: a project that changed name (working title → final) is ONE title, never forked.
+        # The dropped (former) name is preserved as an alias DATA POINT (surfaced as "einnig þekkt sem").
+        for m in _md.get("title", {}).get("merges", []):
+            for drop in m.get("drop", []):
+                _title_redirect[drop] = m["keep"]
+                _title_merge_log.append((m["keep"], drop, m.get("drop_name", drop), m.get("keep_name", m["keep"])))
 
     def _flatten(rd):  # follow chains A->B->C so every drop resolves to the FINAL canonical
         for k in list(rd):
@@ -508,6 +515,8 @@ def main() -> int:
             rd[k] = v
     _flatten(_merge_redirect)
     _flatten(_person_redirect)
+    _flatten(_title_redirect)
+    _title_keep_display = {kn: kname for kn, _, _, kname in _title_merge_log}  # canonical norm -> display
 
     def _cnorm(s):  # company norm (drops legal suffixes); applies confirmed merges
         s = _re.sub(r"\b(ehf|slf|sf|hf|ses)\b", " ", (s or "").lower())
@@ -581,11 +590,17 @@ def main() -> int:
                             "manual_merge", "verified", "resolved"))
 
     # ---- titles: production catalog + every allocation project ----
-    title_reg = {}     # title_norm -> title_id
+    title_reg = {}     # title_norm (canonical) -> title_id
     prod_dirs = []     # (title_id, director_string) from the production catalog
+
+    def _tnorm(s):     # title norm + confirmed title merges (a renamed/variant title → its canonical)
+        n = _norm(s)
+        return _title_redirect.get(n, n)
+
     allocs = list(conn.execute(
         "SELECT id, project_title, year, amount_isk, commitment_isk, family, format_track, company, director, writer, producer FROM allocations"))
-    alloc_idx = [(_norm(a["project_title"]), a) for a in allocs if len(_norm(a["project_title"])) >= 3]
+    alloc_idx = [(_tnorm(a["project_title"]), _norm(a["project_title"]), a)
+                 for a in allocs if len(_norm(a["project_title"])) >= 3]
 
     # resolved IMDb links (from ingest/imdb_resolve.py) backfill tconsts onto catalog titles
     links_path = ROOT / "data" / "curated" / "imdb_links.json"
@@ -599,10 +614,10 @@ def main() -> int:
 
     for prod_staged in sorted((ROOT / "data" / "staged").glob("productions_*.json")):
         for p in json.loads(prod_staged.read_text(encoding="utf-8")):
-            npn, py = _norm(p.get("title")), p.get("year")
+            npn, py = _tnorm(p.get("title")), p.get("year")
             tconst = p.get("imdb") or imdb_link.get((npn, py)) or imdb_link.get(npn)
             matches = []
-            for nt, a in alloc_idx:
+            for nt, _raw, a in alloc_idx:
                 exact = nt == npn
                 contained = len(npn) >= 5 and (npn in nt or nt in npn)
                 if not (exact or contained):
@@ -617,6 +632,7 @@ def main() -> int:
             # before our window — funding status genuinely UNKNOWN (older script grants existed).
             xref = "matched" if matches else ("no_record_in_window" if (py and py >= 2021) else "before_window")
             ptitle, pformers = _clean_title(p.get("title"))
+            ptitle = _title_keep_display.get(npn, ptitle)   # if merged, show the canonical name
             cur = conn.execute(
                 "INSERT INTO title(kvik_id,imdb_tconst,title,year,kind,status,director,where_shown_json,og_type,url,source,kmi_funded,kmi_alloc_count,kmi_total_isk,kmi_years_json,match_confidence,xref_status,matched_json) "
                 "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
@@ -633,8 +649,14 @@ def main() -> int:
             if p.get("director"):
                 prod_dirs.append((tid, p.get("director")))
 
-    for npn, a in alloc_idx:  # most allocation projects become a title (resolve or create)
+    for npn, raw, a in alloc_idx:  # most allocation projects become a title (resolve or create)
         if npn in title_reg:
+            # Resolves to an existing title. If this allocation's own name differs from the canonical
+            # (a confirmed rename redirected it here), preserve that name as a dated alias DATA POINT —
+            # the title's funding history under its former name, NOT a forked duplicate.
+            if raw != npn:
+                aliases.append(("title", a["project_title"], raw, title_reg[npn],
+                                f"src.uthlutanir#{a['year']}", "renamed_to", "verified", "resolved"))
             continue
         # Travel/participation/misc 'annað' grants are NOT productions — their whole description landed
         # in project_title. Keep them as allocation DATA (queryable funding history) but don't mint a
@@ -642,18 +664,19 @@ def main() -> int:
         if a["family"] == "annad" and _is_admin_blob(a["project_title"]):
             continue
         canon, formers = _clean_title(a["project_title"])
+        canon = _title_keep_display.get(npn, canon)   # if this norm is a confirmed canonical, use its name
         cur = conn.execute(
             "INSERT INTO title(title,year,kind,source,kmi_funded,match_confidence,xref_status,confidence) "
             "VALUES(?,?,?,?,1,'high','matched','needs_verification')",
             (canon, a["year"], KIND.get(a["format_track"]), "src.uthlutanir"))
         title_reg[npn] = cur.lastrowid
-        aliases.append(("title", a["project_title"], npn, cur.lastrowid, "src.uthlutanir", "self", "high", "resolved"))
+        aliases.append(("title", a["project_title"], raw, cur.lastrowid, "src.uthlutanir", "self", "high", "resolved"))
         for fmr in formers:                  # working-title history: former name + when (allocation year)
             aliases.append(("title", fmr, _norm(fmr), cur.lastrowid, f"src.uthlutanir#{a['year']}", "former_title", "high", "resolved"))
 
     # ---- award: title-resolved view of every allocation ----
     for a in allocs:
-        tid = title_reg.get(_norm(a["project_title"]))
+        tid = title_reg.get(_tnorm(a["project_title"]))
         if tid:
             conn.execute("INSERT INTO award(title_id,allocation_id,year,amount_isk,family,source) VALUES(?,?,?,?,?,?)",
                          (tid, a["id"], a["year"], a["amount_isk"] or a["commitment_isk"], a["family"], "src.uthlutanir"))
@@ -684,7 +707,7 @@ def main() -> int:
         for n in _people(dirstr):
             _credit(tid, n, "director", "production_catalog")
     for a in allocs:
-        tid = title_reg.get(_norm(a["project_title"]))
+        tid = title_reg.get(_tnorm(a["project_title"]))
         if not tid:
             continue
         for field, role in (("director", "director"), ("writer", "writer"), ("producer", "producer")):
