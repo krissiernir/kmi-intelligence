@@ -1,8 +1,508 @@
 {
   "_about": "Human-confirmed entity merges, applied by compile.py. {company,person}.{merges,rejected}; dropped norms collapse into keep.",
   "company": {
-    "merges": [],
-    "rejected": []
+    "merges": [
+      {
+        "keep": "skak bíofilm",
+        "drop": [
+          "skak bíófilm"
+        ],
+        "keep_name": "SKAK bíofilm",
+        "drop_name": "SKAK bíófilm",
+        "score": 0.9977,
+        "reason": "manual review"
+      },
+      {
+        "keep": "mystery ísland",
+        "drop": [
+          "mystery island"
+        ],
+        "keep_name": "Mystery Ísland ehf",
+        "drop_name": "Mystery Island",
+        "score": 0.9977,
+        "reason": "manual review"
+      },
+      {
+        "keep": "stúdíó sýrland",
+        "drop": [
+          "studíó sýrland"
+        ],
+        "keep_name": "Stúdíó Sýrland ehf.",
+        "drop_name": "Studíó Sýrland",
+        "score": 0.9674,
+        "reason": "manual review"
+      },
+      {
+        "keep": "reykjavik films",
+        "drop": [
+          "reykjavík films"
+        ],
+        "keep_name": "Reykjavik films ehf",
+        "drop_name": "Reykjavík Films",
+        "score": 0.9674,
+        "reason": "manual review"
+      },
+      {
+        "keep": "ísfilm",
+        "drop": [
+          "isfilm"
+        ],
+        "keep_name": "Ísfilm",
+        "drop_name": "Isfilm",
+        "score": 0.9674,
+        "reason": "manual review"
+      },
+      {
+        "keep": "iris film",
+        "drop": [
+          "iris films"
+        ],
+        "keep_name": "Iris film",
+        "drop_name": "Iris Films",
+        "score": 0.9488,
+        "reason": "manual review"
+      },
+      {
+        "keep": "nordisk film tv fond",
+        "drop": [
+          "nordisk film"
+        ],
+        "keep_name": "Nordisk Film & TV-Fond",
+        "drop_name": "Nordisk Film",
+        "score": 0.9488,
+        "reason": "manual review"
+      },
+      {
+        "keep": "join motion pictures anton máni",
+        "drop": [
+          "join motion pictures anton máni svansson"
+        ],
+        "keep_name": "Join Motion Pictures/ Anton Máni",
+        "drop_name": "Join Motion Pictures/ Anton Máni Svansson",
+        "score": 0.9,
+        "reason": "manual review"
+      },
+      {
+        "keep": "polarama kidda rokk guðný guðjónsdóttir tinna hrafnsdóttir",
+        "drop": [
+          "polarama kidda rokk guðný guðjónsdóttir tinna"
+        ],
+        "keep_name": "Polarama/ Kidda Rokk, Guðný Guðjónsdóttir, Tinna Hrafnsdóttir",
+        "drop_name": "Polarama/ Kidda Rokk, Guðný Guðjónsdóttir, Tinna",
+        "score": 0.9,
+        "reason": "manual review"
+      },
+      {
+        "keep": "glassriver",
+        "drop": [
+          "glass river"
+        ],
+        "keep_name": "Glassriver ehf.",
+        "drop_name": "Glass River",
+        "score": 0.896,
+        "reason": "manual review"
+      },
+      {
+        "keep": "sagafilm",
+        "drop": [
+          "saga film"
+        ],
+        "keep_name": "Sagafilm ehf.",
+        "drop_name": "Saga Film",
+        "score": 0.896,
+        "reason": "manual review"
+      },
+      {
+        "keep": "premiere film",
+        "drop": [
+          "premiere"
+        ],
+        "keep_name": "Premiere Film",
+        "drop_name": "Premiere",
+        "score": 0.896,
+        "reason": "manual review"
+      },
+      {
+        "keep": "njuta films",
+        "drop": [
+          "njuta films nf"
+        ],
+        "keep_name": "Njuta Films",
+        "drop_name": "Njuta Films (NF)",
+        "score": 0.896,
+        "reason": "manual review"
+      },
+      {
+        "keep": "imagine film distribution ifd",
+        "drop": [
+          "imagine film distribution"
+        ],
+        "keep_name": "Imagine Film Distribution (IFD)",
+        "drop_name": "Imagine Film Distribution",
+        "score": 0.896,
+        "reason": "manual review"
+      },
+      {
+        "keep": "doggicam systems",
+        "drop": [
+          "doggiecam systems"
+        ],
+        "keep_name": "Doggicam Systems",
+        "drop_name": "DoggieCam Systems",
+        "score": 0.896,
+        "reason": "manual review"
+      },
+      {
+        "keep": "cartoon network studios",
+        "drop": [
+          "cartoon network"
+        ],
+        "keep_name": "Cartoon Network Studios",
+        "drop_name": "Cartoon Network",
+        "score": 0.896,
+        "reason": "manual review"
+      },
+      {
+        "keep": "myrkva myndir",
+        "drop": [
+          "myrkvamyndir"
+        ],
+        "keep_name": "Myrkva myndir",
+        "drop_name": "Myrkvamyndir",
+        "score": 0.896,
+        "reason": "manual review"
+      },
+      {
+        "keep": "scanbox entertainment",
+        "drop": [
+          "scanbox entertainment production"
+        ],
+        "keep_name": "Scanbox Entertainment",
+        "drop_name": "Scanbox Entertainment Production",
+        "score": 0.896,
+        "reason": "manual review"
+      },
+      {
+        "keep": "sky cinema premiere",
+        "drop": [
+          "sky cinema premieren"
+        ],
+        "keep_name": "Sky Cinema Premiere",
+        "drop_name": "Sky Cinema Premieren",
+        "score": 0.896,
+        "reason": "manual review"
+      },
+      {
+        "keep": "sky cinema premieren 24",
+        "drop": [
+          "sky cinema premieren"
+        ],
+        "keep_name": "Sky Cinema Premieren +24",
+        "drop_name": "Sky Cinema Premieren",
+        "score": 0.896,
+        "reason": "manual review"
+      },
+      {
+        "keep": "discovery kids latin america",
+        "drop": [
+          "discovery kix latin america"
+        ],
+        "keep_name": "Discovery Kids Latin America",
+        "drop_name": "Discovery Kix Latin America",
+        "score": 0.896,
+        "reason": "manual review"
+      },
+      {
+        "keep": "sky cinema premiere",
+        "drop": [
+          "sky cinema premieren 24"
+        ],
+        "keep_name": "Sky Cinema Premiere",
+        "drop_name": "Sky Cinema Premieren +24",
+        "score": 0.896,
+        "reason": "manual review"
+      },
+      {
+        "keep": "film partner iceland",
+        "drop": [
+          "film partner"
+        ],
+        "keep_name": "Film Partner Iceland ehf.",
+        "drop_name": "Film Partner",
+        "score": 0.896,
+        "reason": "manual review"
+      },
+      {
+        "keep": "europa film",
+        "drop": [
+          "europafilm"
+        ],
+        "keep_name": "Europa Film",
+        "drop_name": "Europafilm",
+        "score": 0.896,
+        "reason": "manual review"
+      },
+      {
+        "keep": "discovery biggs",
+        "drop": [
+          "discovery kids"
+        ],
+        "keep_name": "Discovery Biggs",
+        "drop_name": "Discovery Kids",
+        "score": 0.896,
+        "reason": "manual review"
+      },
+      {
+        "keep": "discovery force",
+        "drop": [
+          "discovery forced"
+        ],
+        "keep_name": "Discovery Force",
+        "drop_name": "Discovery Forced",
+        "score": 0.896,
+        "reason": "manual review"
+      },
+      {
+        "keep": "discovery force channel",
+        "drop": [
+          "discovery force"
+        ],
+        "keep_name": "Discovery Force Channel",
+        "drop_name": "Discovery Force",
+        "score": 0.896,
+        "reason": "manual review"
+      },
+      {
+        "keep": "eyjafjallajökull entertainment",
+        "drop": [
+          "eyjafjallajökull entertainment sigurjón"
+        ],
+        "keep_name": "Eyjafjallajökull Entertainment",
+        "drop_name": "Eyjafjallajökull Entertainment/ Sigurjón",
+        "score": 0.896,
+        "reason": "manual review"
+      },
+      {
+        "keep": "firnindi friðrik þór friðriksson magnús árni skúlason",
+        "drop": [
+          "firnindi friðrik þór friðriksson magnús árni"
+        ],
+        "keep_name": "Firnindi/Friðrik Þór Friðriksson, Magnús Árni Skúlason",
+        "drop_name": "Firnindi/Friðrik Þór Friðriksson, Magnús Árni",
+        "score": 0.896,
+        "reason": "manual review"
+      },
+      {
+        "keep": "maxdome store",
+        "drop": [
+          "maxdome"
+        ],
+        "keep_name": "Maxdome Store",
+        "drop_name": "Maxdome",
+        "score": 0.8405,
+        "reason": "manual review"
+      },
+      {
+        "keep": "bac films",
+        "drop": [
+          "bac films international"
+        ],
+        "keep_name": "Bac Films",
+        "drop_name": "Bac Films International",
+        "score": 0.8405,
+        "reason": "manual review"
+      },
+      {
+        "keep": "netop films",
+        "drop": [
+          "netop films grímar jónsson"
+        ],
+        "keep_name": "Netop Films ehf.",
+        "drop_name": "Netop Films/ Grímar Jónsson",
+        "score": 0.8405,
+        "reason": "manual review"
+      },
+      {
+        "keep": "paradiso entertainment",
+        "drop": [
+          "paradiso home entertainment"
+        ],
+        "keep_name": "Paradiso Entertainment",
+        "drop_name": "Paradiso Home Entertainment",
+        "score": 0.8405,
+        "reason": "manual review"
+      },
+      {
+        "keep": "ursus parvus",
+        "drop": [
+          "ursus parvus hlín jóhannesdóttir"
+        ],
+        "keep_name": "Ursus Parvus ehf.",
+        "drop_name": "Ursus Parvus/ Hlín Jóhannesdóttir",
+        "score": 0.8405,
+        "reason": "manual review"
+      },
+      {
+        "keep": "13th street universal",
+        "drop": [
+          "13th street"
+        ],
+        "keep_name": "13th Street Universal",
+        "drop_name": "13th Street",
+        "score": 0.84,
+        "reason": "manual review"
+      },
+      {
+        "keep": "bjartsýn films",
+        "drop": [
+          "bjartsýn films sunna guðnadóttir heather millard"
+        ],
+        "keep_name": "Bjartsýn Films ehf.",
+        "drop_name": "Bjartsýn Films/ Sunna Guðnadóttir, Heather Millard",
+        "score": 0.84,
+        "reason": "manual review"
+      },
+      {
+        "keep": "compass films",
+        "drop": [
+          "compass films heather millard freyja kristinsdóttir"
+        ],
+        "keep_name": "Compass films",
+        "drop_name": "Compass films/ Heather Millard, Freyja Kristinsdóttir",
+        "score": 0.84,
+        "reason": "manual review"
+      },
+      {
+        "keep": "h m s productions",
+        "drop": [
+          "h m s"
+        ],
+        "keep_name": "H.M.S. Productions",
+        "drop_name": "H.M.S",
+        "score": 0.84,
+        "reason": "manual review"
+      },
+      {
+        "keep": "h m s productions",
+        "drop": [
+          "h m s productions bragi þór hinriksson"
+        ],
+        "keep_name": "H.M.S. Productions",
+        "drop_name": "H.M.S. Productions/ Bragi Þór Hinriksson",
+        "score": 0.84,
+        "reason": "manual review"
+      },
+      {
+        "keep": "hope glory pictures international",
+        "drop": [
+          "hope glory pictures"
+        ],
+        "keep_name": "Hope & Glory Pictures International",
+        "drop_name": "Hope & Glory Pictures",
+        "score": 0.84,
+        "reason": "manual review"
+      },
+      {
+        "keep": "join motion pictures",
+        "drop": [
+          "join motion pictures anton máni svansson"
+        ],
+        "keep_name": "Join Motion Pictures ehf.",
+        "drop_name": "Join Motion Pictures/ Anton Máni Svansson",
+        "score": 0.84,
+        "reason": "manual review"
+      },
+      {
+        "keep": "kvikmyndafélag íslands",
+        "drop": [
+          "kvikmyndafélag íslands júlíus kemp ingvar þórðarson"
+        ],
+        "keep_name": "Kvikmyndafélag Íslands ehf.",
+        "drop_name": "Kvikmyndafélag Íslands/ Júlíus Kemp, Ingvar Þórðarson",
+        "score": 0.84,
+        "reason": "manual review"
+      },
+      {
+        "keep": "netop films",
+        "drop": [
+          "netop films daniel m hlendorph grímar jonsson"
+        ],
+        "keep_name": "Netop Films ehf.",
+        "drop_name": "Netop Films/ Daniel Mühlendorph, Grímar Jonsson",
+        "score": 0.84,
+        "reason": "manual review"
+      },
+      {
+        "keep": "northern wave productions",
+        "drop": [
+          "northern wave"
+        ],
+        "keep_name": "Northern Wave Productions ehf.",
+        "drop_name": "Northern Wave",
+        "score": 0.84,
+        "reason": "manual review"
+      },
+      {
+        "keep": "pacific title and art studio",
+        "drop": [
+          "pacific title"
+        ],
+        "keep_name": "Pacific Title and Art Studio",
+        "drop_name": "Pacific Title",
+        "score": 0.84,
+        "reason": "manual review"
+      },
+      {
+        "keep": "tele 5 tm tv",
+        "drop": [
+          "tele 5"
+        ],
+        "keep_name": "Tele 5 TM-TV",
+        "drop_name": "Tele 5",
+        "score": 0.84,
+        "reason": "manual review"
+      },
+      {
+        "keep": "zik zak",
+        "drop": [
+          "zik zak filmworks"
+        ],
+        "keep_name": "Zik Zak ehf.",
+        "drop_name": "Zik Zak Filmworks",
+        "score": 0.84,
+        "reason": "manual review"
+      }
+    ],
+    "rejected": [
+      [
+        "viasat 4",
+        "viasat3"
+      ],
+      [
+        "discovery kids",
+        "discovery zdx"
+      ],
+      [
+        "discovery force",
+        "discovery vortexx"
+      ],
+      [
+        "nordisk film tv fond",
+        "nordisk film biografdistribution"
+      ],
+      [
+        "saga film",
+        "sam film"
+      ],
+      [
+        "discovery toons latin america",
+        "discovery toons"
+      ],
+      [
+        "nordisk film",
+        "nordisk film shortcut"
+      ]
+    ]
   },
   "person": {
     "merges": [
