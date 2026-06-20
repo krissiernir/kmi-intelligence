@@ -239,7 +239,8 @@ elif page == "🧑‍🎬 People & companies":
     kind = st.radio("Look up a", ["Person", "Company"], horizontal=True)
     if kind == "Person":
         name = st.text_input("Person name", "Olaf de Fleur")
-        matches = q("SELECT id, display_name, primary_roles, credit_count, imdb_nconst, source FROM person "
+        matches = q("SELECT id, display_name, primary_roles, credit_count, imdb_nconst, source, "
+                    "career_first_feature_year, career_json FROM person "
                     "WHERE fold(display_name) LIKE fold(?) ORDER BY credit_count DESC LIMIT 25", (f"%{name}%",))
         if matches.empty:
             st.info("No match.")
@@ -254,8 +255,23 @@ elif page == "🧑‍🎬 People & companies":
             else:
                 p = matches.iloc[0]
             st.subheader(f"{p['display_name']}")
-            st.caption(f"Roles: {p['primary_roles']} · {p['credit_count']} credits"
+            st.caption(f"Roles: {p['primary_roles']} · {p['credit_count']} credits *in the KMÍ catalog* "
+                       "(NOT a career count)"
                        + (f" · IMDb {p['imdb_nconst']}" if p['imdb_nconst'] else "") + f" · source {p['source']}")
+            # Real IMDb career (from the careers fold) — the truthful "when did they start".
+            if pd.notna(p.get("career_first_feature_year")):
+                import json as _json
+                roles = {}
+                try:
+                    roles = _json.loads(p["career_json"]) if p.get("career_json") else {}
+                except Exception:
+                    roles = {}
+                bits = [f"**{r}**: first feature {v['first_feature_year']} "
+                        f"_{v.get('first_feature_title','')}_ ({v.get('feature_count','?')} features)"
+                        for r, v in sorted(roles.items(), key=lambda kv: kv[1].get("first_feature_year", 9999))]
+                st.markdown(f"🎬 **Career first feature: {int(p['career_first_feature_year'])}** — "
+                            + " · ".join(bits) if bits else
+                            f"🎬 **Career first feature: {int(p['career_first_feature_year'])}**")
             flagging.flag_button(st, "person", int(p["id"]), p["display_name"], queue_path=QUEUE)
             st.markdown("**Filmography**")
             st.dataframe(q("""SELECT t.year, t.title, tc.role, t.kind, t.kmi_funded

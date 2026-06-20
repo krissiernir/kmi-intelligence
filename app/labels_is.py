@@ -93,8 +93,8 @@ IS = {
     "pf_title": "Framleiðslur ↔ úthlutanir KMÍ",
     "pf_titles": "Framleiðslur",
     "pf_matched": "Með úthlutun",
-    "pf_unfunded": "Líklega óstyrkt (2022+)",
-    "pf_gap": "Utan skrár (fyrir 2021)",
+    "pf_unfunded": "Engin úthlutun skráð (2021–24)",
+    "pf_gap": "Fyrir gagnatímabil KMÍ (<2021) — óþekkt",
     "pf_kind": "Tegund",
     "pf_status": "Tengistaða",
     "pf_from_year": "Frá ári",
@@ -118,9 +118,12 @@ LEVEL_IS = {
     "strategic": "Stefnumótandi", "optional": "Valkvætt",
 }
 
-# Production ↔ ledger cross-reference status
+# Production ↔ ledger cross-reference status. Describes KMÍ's RECORD, never asserts "unfunded".
 XREF_IS = {
-    "matched": "með úthlutun", "likely_unfunded": "líklega óstyrkt", "ledger_gap": "utan skrár",
+    "matched": "með úthlutun",
+    "no_record_in_window": "engin úthlutun skráð (innan tímabils)",
+    "before_window": "fyrir gagnatímabil KMÍ (<2021) — óþekkt",
+    "likely_unfunded": "engin úthlutun skráð (innan tímabils)", "ledger_gap": "fyrir gagnatímabil KMÍ (<2021) — óþekkt",
 }
 
 # Kind of work

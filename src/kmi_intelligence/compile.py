@@ -154,7 +154,11 @@ CREATE TABLE title (
 
 CREATE TABLE person (
     id INTEGER PRIMARY KEY, display_name TEXT, name_norm TEXT, imdb_nconst TEXT,
-    kvik_person_id TEXT, region TEXT DEFAULT 'IS', primary_roles TEXT, credit_count INTEGER,
+    kvik_person_id TEXT, region TEXT DEFAULT 'IS', primary_roles TEXT,
+    credit_count INTEGER,                 -- CATALOG-SCOPED: credits within our ~919-title KMÍ catalog
+                                          -- only. NOT a career count; do NOT read as a debut signal.
+    career_first_feature_year INTEGER,    -- REAL IMDb career: earliest feature (kind=movie) across roles
+    career_json TEXT,                     -- per-role {first_feature_year,first_feature_tconst,feature_count}
     source TEXT, confidence TEXT
 );
 
@@ -578,7 +582,11 @@ def main() -> int:
                     continue
                 matches.append({"year": a["year"], "amount_isk": a["amount_isk"] or a["commitment_isk"] or 0, "exact": exact})
             conf = "high" if any(m["exact"] for m in matches) else ("medium" if matches else "none")
-            xref = "matched" if matches else ("likely_unfunded" if (py and py >= 2022) else "ledger_gap")
+            # Funding status is about what KMÍ's ledger RECORDS, never an assertion that a film was
+            # "unfunded". Our allocation data covers 2021–24 only: a title in-window with no match has
+            # "no record" (could be a match miss or a stream we lack); a pre-2021 title is simply
+            # before our window — funding status genuinely UNKNOWN (older script grants existed).
+            xref = "matched" if matches else ("no_record_in_window" if (py and py >= 2021) else "before_window")
             cur = conn.execute(
                 "INSERT INTO title(kvik_id,imdb_tconst,title,year,kind,status,director,where_shown_json,og_type,url,source,kmi_funded,kmi_alloc_count,kmi_total_isk,kmi_years_json,match_confidence,xref_status,matched_json) "
                 "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
@@ -781,6 +789,41 @@ def main() -> int:
         print(f"  IMDb fold: {istats['titles']} titles · +{istats['credits']} credits "
               f"(+{istats['new_people']} new / {istats['linked_people']} linked people) · "
               f"+{istats['tcos']} company edges (+{istats['new_cos']} new / {istats['linked_cos']} linked cos)")
+
+    # ---- careers fold: REAL IMDb career first-feature (from ingest/imdb.py `careers`) ----
+    # Person-keyed filmographies -> career_first_feature_year (overall) + career_json (per role).
+    # This is the truthful "when did they actually start" signal; the catalog-scoped credit_count
+    # cannot answer it (a visiting DOP reads as credit_count=1). LOCAL-only IMDb data, never exported.
+    cdir = ROOT / "data" / "raw" / "imdb_careers"
+    if cdir.exists():
+        folded = 0
+        for f in cdir.glob("nm*.json"):
+            try:
+                rec = json.loads(f.read_text(encoding="utf-8"))
+            except Exception:                                                 # noqa: BLE001
+                continue
+            roles = rec.get("roles") or {}
+            if not roles:
+                continue
+            years = [v["first_feature_year"] for v in roles.values() if v.get("first_feature_year")]
+            first = min(years) if years else None
+            folded += conn.execute(
+                "UPDATE person SET career_first_feature_year=?, career_json=? WHERE imdb_nconst=?",
+                (first, json.dumps(roles, ensure_ascii=False), rec.get("nconst"))).rowcount
+        print(f"  careers fold: {folded} people given a real career first-feature year")
+
+    # ---- director backfill: a missing title.director is a GAP, not "no director". Fill it from the
+    # director CREDIT where we have one (IMDb/úthlutanir); titles with no director credit at all stay
+    # NULL = honestly unknown (the app renders that as "óþekkt", never "no director").
+    filled = conn.execute(
+        "UPDATE title SET director = ("
+        "  SELECT p.display_name FROM title_credit tc JOIN person p ON p.id = tc.person_id "
+        "  WHERE tc.title_id = title.id AND tc.role = 'director' "
+        "  ORDER BY p.credit_count DESC LIMIT 1) "
+        "WHERE (director IS NULL OR director = '') "
+        "AND EXISTS (SELECT 1 FROM title_credit tc WHERE tc.title_id = title.id AND tc.role = 'director')"
+    ).rowcount
+    print(f"  director backfill: {filled} titles given a director from credits (rest remain unknown)")
 
     # ---- Zone 3: Klapptré CORPUS + landscape facts (isolated; reads Zone 1/2 only) ----
     kdir = ROOT / "data" / "raw" / "klapptre"

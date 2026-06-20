@@ -1,6 +1,21 @@
 PYTHON ?= python3
 
-.PHONY: init run fetch parse kvik wiki-films producers klapptre imdb-datasets imdb-verify imdb-setup imdb-enrich imdb-resolve build packs health log flags lint format validate er-setup resolve review nlp-setup embed embed-setup rag-search publish mcp mcp-setup all
+.PHONY: init run fetch parse kvik wiki-films producers klapptre imdb-datasets imdb-verify imdb-setup imdb-enrich imdb-careers imdb-resolve build duckdb packs health log flags lint format validate er-setup resolve review nlp-setup embed embed-setup rag-search publish mcp mcp-setup all
+
+# Rebuild the native-DuckDB mirror of the SQLite DB (run by `make duckdb`, via mcp-server-duckdb's
+# own duckdb so the storage format matches the read-only MCP). build/ is gitignored — local artifact.
+define DUCKDB_MIRROR
+import duckdb, sqlite3, os
+SRC=os.path.abspath("build/kmi.db"); DST=os.path.abspath("build/kmi.duckdb")
+assert os.path.exists(SRC), "build/kmi.db missing — run `make build` first"
+os.path.exists(DST) and os.remove(DST)
+con=duckdb.connect(DST); con.execute("INSTALL sqlite; LOAD sqlite;")
+con.execute(f"ATTACH '{SRC}' AS s (TYPE sqlite, READ_ONLY);")
+tabs=[t for (t,) in sqlite3.connect(SRC).execute("SELECT name FROM sqlite_master WHERE type='table'")]
+for t in tabs: con.execute(f'CREATE TABLE "{t}" AS SELECT * FROM s."{t}"')
+con.close(); print(f"built build/kmi.duckdb ({len(tabs)} tables)")
+endef
+export DUCKDB_MIRROR
 
 init:           ## install dashboard deps (streamlit/pandas) into the active env
 	$(PYTHON) -m pip install -r requirements.txt
@@ -8,6 +23,9 @@ init:           ## install dashboard deps (streamlit/pandas) into the active env
 # --- knowledge base pipeline (see docs/ARCHITECTURE.md) ---
 build:          ## curated/*.json (+ data/raw/imdb_full fold) -> build/kmi.db (validates provenance)
 	$(PYTHON) -m src.kmi_intelligence.compile
+
+duckdb:         ## mirror build/kmi.db -> build/kmi.duckdb (native columnar, for the read-only duckdb MCP). Re-run after build.
+	@uvx --from mcp-server-duckdb python -c "$$DUCKDB_MIRROR"
 
 parse:          ## raw úthlutanir PDFs -> data/staged/allocations.json
 	$(PYTHON) -m src.kmi_intelligence.ingest.parse_uthlutanir
@@ -36,6 +54,9 @@ imdb-setup:     ## one-time: py3.12 venv + imdbinfo (needs uv) for enrich/resolv
 
 imdb-enrich:    ## PRIMARY: full IMDb credits (crew/companies/box-office) -> data/raw/imdb_full/ (folded by build)
 	PYTHONPATH=src .venv-imdb/bin/python -m kmi_intelligence.ingest.imdb enrich
+
+imdb-careers:   ## person filmographies -> data/raw/imdb_careers/ (real career first-feature year; folded by build)
+	PYTHONPATH=src .venv-imdb/bin/python -m kmi_intelligence.ingest.imdb careers
 
 imdb-resolve:   ## find tconsts for catalog titles lacking one -> data/curated/imdb_links.json
 	PYTHONPATH=src .venv-imdb/bin/python -m kmi_intelligence.ingest.imdb resolve

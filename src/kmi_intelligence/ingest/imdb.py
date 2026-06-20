@@ -4,6 +4,9 @@
              (stdlib; runs in system python). Bulletproof but principals-only.
   enrich     PRIMARY: full credits via the `imdbinfo` library -> data/raw/imdb_full/
              (needs .venv-imdb). ~50 departments + companies + box office + AKAs.
+  careers    person-keyed filmographies via `imdbinfo.get_filmography` -> data/raw/imdb_careers/
+             (needs .venv-imdb). Per person-per-role: REAL career first-feature year + feature
+             count. Lets compile derive a true debut signal (our catalog-scoped credit_count cannot).
   verify     validate our tconsts against IMDb title.basics (stdlib) -> data/raw/imdb/verify.json
   resolve    find tconsts for catalog titles that lack one (imdbinfo search) ->
              data/curated/imdb_links.json (+ a review queue); compile.py backfills these.
@@ -33,6 +36,7 @@ ROOT = Path(__file__).resolve().parents[3]
 DB = ROOT / "build" / "kmi.db"
 OUT_DS = ROOT / "data" / "raw" / "imdb"
 OUT_FULL = ROOT / "data" / "raw" / "imdb_full"
+OUT_CAREER = ROOT / "data" / "raw" / "imdb_careers"
 LINKS = ROOT / "data" / "curated" / "imdb_links.json"
 REVIEW = ROOT / "data" / "staged" / "imdb_resolve_review.json"
 BASE = "https://datasets.imdbws.com"
@@ -222,6 +226,88 @@ def run_enrich() -> int:
     return 0
 
 
+# ──────────────────────────────── careers (person filmography) ────────────────────────────────
+# Our title_credit.role -> imdbinfo.get_filmography() category key (same names). These are the
+# authorship roles where "first feature" is a meaningful debut signal.
+CAREER_ROLES = ("director", "cinematographer", "writer", "producer")
+
+
+def _career_people():
+    """Distinct (nconst, name) for people credited in an authorship role and carrying an IMDb id."""
+    c = sqlite3.connect(DB)
+    return c.execute(
+        "SELECT DISTINCT p.imdb_nconst, p.display_name FROM person p "
+        "JOIN title_credit tc ON tc.person_id = p.id "
+        f"WHERE tc.role IN ({','.join('?' * len(CAREER_ROLES))}) AND p.imdb_nconst LIKE 'nm%' "
+        "ORDER BY p.imdb_nconst", CAREER_ROLES).fetchall()
+
+
+def _career_roles(fg) -> dict:
+    """Per role: real career first FEATURE (kind=='movie') year/tconst/title + feature & total counts."""
+    out = {}
+    for role in CAREER_ROLES:
+        items = fg.get(role) or []
+        feats = sorted((m for m in items if getattr(m, "kind", None) == "movie" and getattr(m, "year", None)),
+                       key=lambda m: m.year)
+        if not feats:
+            continue
+        first = feats[0]
+        out[role] = {"first_feature_year": first.year,
+                     "first_feature_tconst": getattr(first, "imdbId", None),
+                     "first_feature_title": first.title,
+                     "feature_count": len(feats),
+                     "credit_count": len(items)}   # all kinds, real career — vs our catalog-scoped count
+    return out
+
+
+def run_careers() -> int:
+    from imdbinfo import get_filmography
+    from imdbinfo.exceptions import WAFError
+    OUT_CAREER.mkdir(parents=True, exist_ok=True)
+    people = _career_people()
+    limit, force = int(os.environ.get("KMI_LIMIT", "0") or 0), os.environ.get("KMI_FORCE") == "1"
+    if limit:
+        people = people[:limit]
+    print(f"pulling filmographies for {len(people)} people (force={force}) -> {OUT_CAREER.relative_to(ROOT)}")
+
+    def fetch(nc):
+        for attempt in range(1, WAF_RETRIES + 1):
+            try:
+                return get_filmography(nc)
+            except WAFError:
+                if attempt == WAF_RETRIES:
+                    raise
+                time.sleep(random.uniform(*WAF_BACKOFF) * attempt)
+
+    manifest, failures, done, skipped = [], [], 0, 0
+    for i, (nc, name) in enumerate(people, 1):
+        dest = OUT_CAREER / f"{nc}.json"
+        if dest.exists() and not force:
+            skipped += 1
+            continue
+        try:
+            roles = _career_roles(fetch(nc))
+            rec = {"nconst": nc, "name": name, "roles": roles, "_source": "src.imdbinfo.filmography"}
+            dest.write_text(json.dumps(rec, ensure_ascii=False, indent=2), encoding="utf-8")
+            done += 1
+            manifest.append({"nconst": nc, "name": name,
+                             "roles": {r: v["first_feature_year"] for r, v in roles.items()}})
+            if i % 25 == 0:
+                print(f"  [{i}/{len(people)}] {done} done, {skipped} skipped, {len(failures)} failed")
+        except Exception as e:                                                # noqa: BLE001
+            failures.append({"nconst": nc, "name": name, "error": f"{type(e).__name__}: {e}"})
+            print(f"  [{i}/{len(people)}] {nc} {name!r} FAILED {type(e).__name__}: {str(e)[:60]}")
+        time.sleep(random.uniform(*SLEEP))
+    (OUT_CAREER / "manifest_careers.json").write_text(
+        json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
+    (OUT_CAREER / "failures.json").write_text(
+        json.dumps(failures, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"done={done} skipped={skipped} failed={len(failures)} of {len(people)}")
+    from .. import log_event
+    log_event("imdb.careers", people=done, skipped=skipped, failed=len(failures))
+    return 0
+
+
 # ──────────────────────────────── resolve (imdbinfo search) ────────────────────────────────
 KIND_OK = {"film": {"movie", "tvMovie", "video"}, "documentary": {"movie", "tvMovie", "video"},
            "short": {"short", "tvShort"}, "series": {"tvSeries", "tvMiniSeries"}}
@@ -292,7 +378,8 @@ def run_resolve() -> int:
     return 0
 
 
-CMDS = {"datasets": run_datasets, "enrich": run_enrich, "verify": run_verify, "resolve": run_resolve}
+CMDS = {"datasets": run_datasets, "enrich": run_enrich, "careers": run_careers,
+        "verify": run_verify, "resolve": run_resolve}
 
 
 def main(argv=None) -> int:
