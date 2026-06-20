@@ -14,6 +14,7 @@ Stdlib only. Run: python -m kmi_intelligence.compile
 from __future__ import annotations
 
 import json
+import re
 import sqlite3
 import sys
 from pathlib import Path
@@ -23,6 +24,31 @@ from . import log_event
 ROOT = Path(__file__).resolve().parents[2]
 CURATED = ROOT / "data" / "curated"
 BUILD = ROOT / "build"
+
+# Clean grant-label contamination out of name/company fields parsed from the úthlutanir PDFs.
+# Pattern A (recoverable): a real name/company with a trailing label — "Reykjavík Films Styrkur",
+# "Grímar Jónsson Vilyrði", "Wonderfilms (vilyrði skilað)". Pattern B (garbage): a whole mis-parsed
+# travel/festival row whose "name" is a grant-purpose description — "Ferðastyrkur á Nordisk
+# Panorama-…", "rarstyrkur 150.000". A returns the clean name; B returns None (no entity made).
+_TRAIL_LABELS = {"styrkur", "styrkir", "vilyrði", "vilyrdi"}
+_GARBAGE = re.compile(
+    r"ferðastyrk|ferdastyrk|þátttökustyrk|thatttoku|þátttöku í|vinnusto|vinnusmi|handritasmi|"
+    r"handritavinnusmi|ráðstefn|radstefn|nordisk panorama|\bynpc\b|flugmið|endurgreidd|styrkur til|"
+    r"styrkut til|\d", re.I)
+
+
+def _clean_entity_field(s):
+    if not s:
+        return s
+    v = re.sub(r"\([^)]*(?:vilyr[ðd]i|skila[ðd])[^)]*\)", " ", s, flags=re.I)  # drop "(vilyrði skilað)"
+    v = re.sub(r"\s+", " ", v).strip()
+    toks = v.split()
+    while toks and re.sub(r"[^0-9a-záéíóúýþæöð]", "", toks[-1].lower()) in _TRAIL_LABELS:
+        toks.pop()  # strip trailing Styrkur/Vilyrði (possibly repeated)
+    v = " ".join(toks).strip(" -–/.,")
+    if not v or _GARBAGE.search(v):
+        return None  # Pattern B garbage → no entity
+    return v
 DB_PATH = BUILD / "kmi.db"
 
 PORTAL_PATTERN = "https://umsokn.kvikmyndamidstod.is/web/portal/application.html?id={}"
@@ -408,8 +434,9 @@ def main() -> int:
                 "INSERT INTO allocations(year,project_title,family,subtype,format_track,applicant,company,producer,director,writer,amount_isk,total_isk,commitment_isk,commitments_json,source_id,raw_line,confidence) "
                 "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                 (a.get("year"), a.get("project_title"), a.get("family"), a.get("subtype"),
-                 a.get("format_track"), a.get("applicant"), a.get("company"),
-                 a.get("producer"), a.get("director"), a.get("writer"), a.get("amount_isk"),
+                 a.get("format_track"), _clean_entity_field(a.get("applicant")), _clean_entity_field(a.get("company")),
+                 _clean_entity_field(a.get("producer")), _clean_entity_field(a.get("director")),
+                 _clean_entity_field(a.get("writer")), a.get("amount_isk"),
                  a.get("total_isk"), a.get("commitment_isk"), a.get("commitments_json"),
                  a.get("source_id"), a.get("raw_line"), a.get("confidence", "needs_verification")),
             )
