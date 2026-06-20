@@ -30,6 +30,10 @@ duckdb:         ## mirror build/kmi.db -> build/kmi.duckdb (native columnar, for
 parse:          ## raw úthlutanir PDFs -> data/staged/allocations.json
 	$(PYTHON) -m src.kmi_intelligence.ingest.parse_uthlutanir
 
+parse-archive:  ## pre-2021 KMÍ úthlutanir from the Internet Archive -> data/staged/allocations_archive.json
+	$(PYTHON) -m src.kmi_intelligence.ingest.uthlutanir_archive harvest
+	$(PYTHON) -m src.kmi_intelligence.ingest.uthlutanir_archive
+
 kvik:           ## ingest kvikmyndir.is Icelandic SERIES -> data/staged/productions_series.json
 	$(PYTHON) -m src.kmi_intelligence.ingest.kvikmyndir
 

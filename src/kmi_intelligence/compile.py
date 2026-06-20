@@ -429,10 +429,15 @@ def main() -> int:
         conn.execute("INSERT INTO film_archive_links(deposit_id,link_key,url) VALUES(?,?,?)",
                      (dep["id"], key, url))
 
-    # allocations: load from staged if present (ledger comes later)
-    staged = ROOT / "data" / "staged" / "allocations.json"
+    # allocations: load from staged if present (ledger comes later). allocations.json is the modern
+    # 2021–24 PDF parse; allocations_archive.json is the pre-2021 set recovered from the Internet
+    # Archive (ingest/uthlutanir_archive.py) — same shape, carries source_id ...wayback. Both fold in
+    # so the ledger reaches back to ~2015; a pre-2021 film is no longer "before our window" by accident.
     alloc_n = 0
-    if staged.exists():
+    for staged in (ROOT / "data" / "staged" / "allocations.json",
+                   ROOT / "data" / "staged" / "allocations_archive.json"):
+        if not staged.exists():
+            continue
         for a in json.loads(staged.read_text(encoding="utf-8")):
             conn.execute(
                 "INSERT INTO allocations(year,project_title,family,subtype,format_track,applicant,company,producer,director,writer,amount_isk,total_isk,commitment_isk,commitments_json,source_id,raw_line,confidence) "
