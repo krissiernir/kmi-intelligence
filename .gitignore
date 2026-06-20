@@ -29,3 +29,7 @@ data/staged/
 #   - data/raw/{site,kvikmyndir,html} : heavy re-fetchable mirrors (make fetch / make kvik)
 #   - data/raw/{uthlutanir,manual,wikipedia,producers} : provenance — re-supply locally to rebuild
 data/raw/
+
+# local secrets (API keys) — NEVER commit
+.env
+.streamlit/secrets.toml
