@@ -34,6 +34,7 @@ DB_PATH = ROOT / "build" / "kmi.db"
 OUT = ROOT / "build" / "embeddings"
 CHUNKS = OUT / "chunks.jsonl"
 INDEX = OUT / "index.jsonl"
+LEXICAL = OUT / "lexical.json"   # BM25-over-lemmas sparse index (hybrid retrieval)
 HASH_DIM = 512
 
 
@@ -204,21 +205,83 @@ def build_index(backend: str) -> int:
     return len(rows)
 
 
-def search(query: str, backend: str, k: int = 5) -> list[dict]:
-    rows = [json.loads(l) for l in INDEX.read_text(encoding="utf-8").splitlines()]
-    rows = [r for r in rows if "vector" in r]
-    qv = EMBEDDERS[backend]([query], "query")[0]
+# ---------------- lexical (BM25 over Miðeind lemmas) — the sparse half of hybrid ----------------
+def _lemma_tokens(text: str):
+    """Tokenize + expand each token to ALL its Icelandic lemmas (needs islenska in this venv;
+    degrades to raw tokens if absent, so lexical still works for exact/foreign terms)."""
+    from .ingest.textclean import lemmas
+    out = []
+    for t in _tokenize(text):
+        out.extend(lemmas(t))
+    return out
 
-    def cos(a, b):
-        return sum(x * y for x, y in zip(a, b))  # vectors are L2-normalized
-    scored = sorted(((cos(qv, r["vector"]), r) for r in rows), key=lambda x: -x[0])[:k]
-    return [{"score": round(s, 4), "id": r["id"], "type": r["metadata"].get("type"),
-             "text": r["text"], "metadata": r["metadata"]} for s, r in scored]
+
+def build_lexical() -> int:
+    from collections import Counter, defaultdict
+    if not CHUNKS.exists():
+        build_chunks()
+    rows = [json.loads(l) for l in CHUNKS.read_text(encoding="utf-8").splitlines()]
+    docs = [_lemma_tokens(r["text"]) for r in rows]
+    N, doc_len = len(docs), [len(d) for d in docs]
+    avgdl = sum(doc_len) / max(1, N)
+    postings, df = defaultdict(dict), Counter()
+    for i, d in enumerate(docs):
+        for term, f in Counter(d).items():
+            postings[term][i] = f
+            df[term] += 1
+    idf = {t: math.log(1 + (N - v + 0.5) / (v + 0.5)) for t, v in df.items()}
+    LEXICAL.write_text(json.dumps({"N": N, "avgdl": avgdl, "doc_len": doc_len, "idf": idf,
+                                   "postings": postings, "ids": [r["id"] for r in rows]}, ensure_ascii=False))
+    print(f"Lexical BM25/lemma index: {N} docs, {len(idf)} lemmas -> {LEXICAL.relative_to(ROOT)}")
+    return N
+
+
+def _bm25(qterms, lex, k1=1.5, b=0.75):
+    scores = {}
+    for t in set(qterms):
+        p = lex["postings"].get(t)
+        if not p:
+            continue
+        idf = lex["idf"][t]
+        for i, f in p.items():
+            i = int(i)
+            dl = lex["doc_len"][i]
+            scores[i] = scores.get(i, 0.0) + idf * (f * (k1 + 1)) / (f + k1 * (1 - b + b * dl / lex["avgdl"]))
+    return scores
+
+
+def search(query: str, backend: str, k: int = 5) -> list[dict]:
+    """Hybrid: dense (e5 cosine) + sparse (BM25 over lemmas), merged by Reciprocal Rank Fusion.
+    Falls back to dense-only when no lexical index / no lemmatizer is present."""
+    rows = [json.loads(l) for l in INDEX.read_text(encoding="utf-8").splitlines() if '"vector"' in l]
+    qv = EMBEDDERS[backend]([query], "query")[0]
+    dense = sorted(range(len(rows)), key=lambda i: -sum(x * y for x, y in zip(qv, rows[i]["vector"])))
+
+    ranked, mode = dense[:k], "dense"
+    if LEXICAL.exists():
+        try:
+            lex = json.loads(LEXICAL.read_text(encoding="utf-8"))
+            id_to_row = {r["id"]: i for i, r in enumerate(rows)}
+            sp = _bm25(_lemma_tokens(query), lex)
+            sparse = [id_to_row[lex["ids"][i]] for i in sorted(sp, key=lambda x: -sp[x])
+                      if lex["ids"][i] in id_to_row]
+            rrf = {}
+            for rank, i in enumerate(dense[:200]):
+                rrf[i] = rrf.get(i, 0.0) + 1 / (60 + rank)
+            for rank, i in enumerate(sparse[:200]):
+                rrf[i] = rrf.get(i, 0.0) + 1 / (60 + rank)
+            ranked, mode = sorted(rrf, key=lambda i: -rrf[i])[:k], "hybrid"
+        except Exception:
+            pass
+
+    return [{"score": round(sum(x * y for x, y in zip(qv, rows[i]["vector"])), 4), "mode": mode,
+             "id": rows[i]["id"], "type": rows[i]["metadata"].get("type"),
+             "text": rows[i]["text"], "metadata": rows[i]["metadata"]} for i in ranked]
 
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=["chunk", "embed", "search"])
+    ap.add_argument("cmd", choices=["chunk", "embed", "lexical", "search"])
     ap.add_argument("query", nargs="?", default="")
     ap.add_argument("--backend", default="hash", choices=list(EMBEDDERS))
     ap.add_argument("-k", type=int, default=5)
@@ -231,6 +294,9 @@ def main() -> int:
         build_chunks()
     elif a.cmd == "embed":
         build_index(a.backend)
+        build_lexical()  # dense + sparse(lemma) together → hybrid search
+    elif a.cmd == "lexical":
+        build_lexical()
     elif a.cmd == "search":
         if not INDEX.exists():
             build_index(a.backend)

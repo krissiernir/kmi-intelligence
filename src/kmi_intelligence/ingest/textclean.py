@@ -108,6 +108,20 @@ def lemma(word: str) -> str:
         return word
 
 
+def lemmas(word: str) -> list[str]:
+    """ALL candidate lemmas for an inflected word — for lexical indexing/expansion, where an
+    ambiguous form ('styrkjum' = noun styrkur OR verb styrkja) must carry every reading so a query
+    on any of them matches. Falls back to [word]. (Use lemma() when you want a single best lemma.)"""
+    b = _get_bin()
+    if not b or not word:
+        return [word] if word else []
+    try:
+        res = b.lookup(word)
+        return sorted({e.ord for e in res[1]}) or [word.lower()]
+    except Exception:
+        return [word.lower()]
+
+
 def normalize_name(s: str) -> str:
     """Person/proper name in any case -> nominative (Baltasars Kormáks -> Baltasar Kormákur).
 
