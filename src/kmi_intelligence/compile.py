@@ -466,6 +466,16 @@ def main() -> int:
                 _person_redirect[drop] = m["keep"]
                 _person_merge_log.append((m["keep"], drop, m.get("drop_name", drop), m.get("keep_name", m["keep"])))
 
+    def _flatten(rd):  # follow chains A->B->C so every drop resolves to the FINAL canonical
+        for k in list(rd):
+            seen, v = {k}, rd[k]
+            while v in rd and v not in seen:
+                seen.add(v)
+                v = rd[v]
+            rd[k] = v
+    _flatten(_merge_redirect)
+    _flatten(_person_redirect)
+
     def _cnorm(s):  # company norm (drops legal suffixes); applies confirmed merges
         s = _re.sub(r"\b(ehf|slf|sf|hf|ses)\b", " ", (s or "").lower())
         base = _re.sub(r"\s+", " ", _re.sub(r"[^0-9a-záéíóúýþæöð]+", " ", s)).strip()
@@ -678,7 +688,7 @@ def main() -> int:
             return int(d) if d else None
 
         def _imdb_person(nconst, name):
-            norm = _norm(name)
+            norm = _person_redirect.get(_norm(name), _norm(name))  # honor confirmed person merges
             if nconst and nconst in pnconst_to_id:
                 return pnconst_to_id[nconst]
             if norm and norm in pname_to_id:                       # exact-name link to existing person

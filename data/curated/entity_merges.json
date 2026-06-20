@@ -1008,8 +1008,441 @@
         "drop_name": "Jónas Jónasson",
         "score": 0.9898,
         "reason": "manual review"
+      },
+      {
+        "keep": "harry johansson",
+        "drop": [
+          "harrý jóhansson"
+        ],
+        "keep_name": "Harry Johansson",
+        "drop_name": "Harrý Jóhansson",
+        "score": 0.9898,
+        "reason": "manual review"
+      },
+      {
+        "keep": "inga maría eyjólfsdóttir",
+        "drop": [
+          "inga maria eyjolfsdottir"
+        ],
+        "keep_name": "Inga María Eyjólfsdóttir",
+        "drop_name": "Inga Maria Eyjolfsdottir",
+        "score": 0.9898,
+        "reason": "manual review"
+      },
+      {
+        "keep": "anna dís ólafsdóttir",
+        "drop": [
+          "anna dís"
+        ],
+        "keep_name": "Anna Dís Ólafsdóttir",
+        "drop_name": "Anna Dís",
+        "score": 0.9,
+        "reason": "manual review"
+      },
+      {
+        "keep": "ari alexander ergis magnússon",
+        "drop": [
+          "ari alexander ergis"
+        ],
+        "keep_name": "Ari Alexander Ergis Magnússon",
+        "drop_name": "Ari Alexander Ergis",
+        "score": 0.9,
+        "reason": "manual review"
+      },
+      {
+        "keep": "ari klængur jónsson",
+        "drop": [
+          "ari klængur"
+        ],
+        "keep_name": "Ari Klængur Jónsson",
+        "drop_name": "Ari Klængur",
+        "score": 0.9,
+        "reason": "manual review"
+      },
+      {
+        "keep": "árni páll árnason",
+        "drop": [
+          "árni páll"
+        ],
+        "keep_name": "Árni Páll Árnason",
+        "drop_name": "Árni Páll",
+        "score": 0.9,
+        "reason": "manual review"
+      },
+      {
+        "keep": "árni páll jóhannsson",
+        "drop": [
+          "árni páll"
+        ],
+        "keep_name": "Árni Páll Jóhannsson",
+        "drop_name": "Árni Páll",
+        "score": 0.9,
+        "reason": "manual review"
+      },
+      {
+        "keep": "aron bergmann magnússon",
+        "drop": [
+          "aron bergmann"
+        ],
+        "keep_name": "Aron Bergmann Magnússon",
+        "drop_name": "Aron Bergmann",
+        "score": 0.9,
+        "reason": "manual review"
+      },
+      {
+        "keep": "bergur ebbi benediktsson",
+        "drop": [
+          "bergur ebbi"
+        ],
+        "keep_name": "Bergur Ebbi Benediktsson",
+        "drop_name": "Bergur Ebbi",
+        "score": 0.9,
+        "reason": "manual review"
+      },
+      {
+        "keep": "dagur kári",
+        "drop": [
+          "dagur kári pétursson"
+        ],
+        "keep_name": "Dagur Kári",
+        "drop_name": "Dagur Kári Pétursson",
+        "score": 0.9,
+        "reason": "manual review"
+      },
+      {
+        "keep": "einar thor",
+        "drop": [
+          "einar thor einarsson"
+        ],
+        "keep_name": "Einar Thor",
+        "drop_name": "Einar Thor Einarsson",
+        "score": 0.9,
+        "reason": "manual review"
+      },
+      {
+        "keep": "erla hrund gísladóttir",
+        "drop": [
+          "erla hrund"
+        ],
+        "keep_name": "Erla Hrund Gísladóttir",
+        "drop_name": "Erla Hrund",
+        "score": 0.9,
+        "reason": "manual review"
+      },
+      {
+        "keep": "erla hrund halldórsdóttir",
+        "drop": [
+          "erla hrund"
+        ],
+        "keep_name": "Erla Hrund Halldórsdóttir",
+        "drop_name": "Erla Hrund",
+        "score": 0.9,
+        "reason": "manual review"
+      },
+      {
+        "keep": "erlingur jack gudmundsson",
+        "drop": [
+          "erlingur jack"
+        ],
+        "keep_name": "Erlingur Jack Gudmundsson",
+        "drop_name": "Erlingur Jack",
+        "score": 0.9,
+        "reason": "manual review"
+      },
+      {
+        "keep": "feng jiang hannesdóttir",
+        "drop": [
+          "feng jiang"
+        ],
+        "keep_name": "Feng Jiang Hannesdóttir",
+        "drop_name": "Feng Jiang",
+        "score": 0.9,
+        "reason": "manual review"
+      },
+      {
+        "keep": "geir konráð theodórsson",
+        "drop": [
+          "geir konráð"
+        ],
+        "keep_name": "Geir Konráð Theodórsson",
+        "drop_name": "Geir Konráð",
+        "score": 0.9,
+        "reason": "manual review"
+      },
+      {
+        "keep": "gunnar örn arnórsson",
+        "drop": [
+          "gunnar örn"
+        ],
+        "keep_name": "Gunnar Örn Arnórsson",
+        "drop_name": "Gunnar Örn",
+        "score": 0.9,
+        "reason": "manual review"
+      },
+      {
+        "keep": "gunnar örn guðmundsson",
+        "drop": [
+          "gunnar örn"
+        ],
+        "keep_name": "Gunnar Örn Guðmundsson",
+        "drop_name": "Gunnar Örn",
+        "score": 0.9,
+        "reason": "manual review"
+      },
+      {
+        "keep": "gunnar örn pétursson",
+        "drop": [
+          "gunnar örn"
+        ],
+        "keep_name": "Gunnar Örn Pétursson",
+        "drop_name": "Gunnar Örn",
+        "score": 0.9,
+        "reason": "manual review"
+      },
+      {
+        "keep": "gunnar örn þorsteinsson",
+        "drop": [
+          "gunnar örn"
+        ],
+        "keep_name": "Gunnar Örn Þorsteinsson",
+        "drop_name": "Gunnar Örn",
+        "score": 0.9,
+        "reason": "manual review"
+      },
+      {
+        "keep": "guðfinnur ýmir",
+        "drop": [
+          "guðfinnur ymir harðarsson"
+        ],
+        "keep_name": "Guðfinnur Ýmir",
+        "drop_name": "Guðfinnur Ymir Harðarsson",
+        "score": 0.9,
+        "reason": "manual review"
+      },
+      {
+        "keep": "guðmundur ingi ingason",
+        "drop": [
+          "guðmundur ingi"
+        ],
+        "keep_name": "Guðmundur Ingi Ingason",
+        "drop_name": "Guðmundur Ingi",
+        "score": 0.9,
+        "reason": "manual review"
+      },
+      {
+        "keep": "guðmundur ingi þorvaldsson",
+        "drop": [
+          "guðmundur ingi"
+        ],
+        "keep_name": "Guðmundur Ingi Þorvaldsson",
+        "drop_name": "Guðmundur Ingi",
+        "score": 0.9,
+        "reason": "manual review"
+      },
+      {
+        "keep": "guðni líndal benediktsson",
+        "drop": [
+          "guðni líndal"
+        ],
+        "keep_name": "Guðni Líndal Benediktsson",
+        "drop_name": "Guðni Líndal",
+        "score": 0.9,
+        "reason": "manual review"
+      },
+      {
+        "keep": "guðrún þ stephensen",
+        "drop": [
+          "guðrún þ"
+        ],
+        "keep_name": "Guðrún Þ. Stephensen",
+        "drop_name": "Guðrún Þ.",
+        "score": 0.9,
+        "reason": "manual review"
+      },
+      {
+        "keep": "halldór laxness halldórsson",
+        "drop": [
+          "halldór laxness"
+        ],
+        "keep_name": "Halldór laxness Halldórsson",
+        "drop_name": "Halldór Laxness",
+        "score": 0.9,
+        "reason": "manual review"
+      },
+      {
+        "keep": "jóhanna guðrún gunnarsdóttir",
+        "drop": [
+          "jóhanna guðrún"
+        ],
+        "keep_name": "Jóhanna Guðrún Gunnarsdóttir",
+        "drop_name": "Jóhanna Guðrún",
+        "score": 0.9,
+        "reason": "manual review"
+      },
+      {
+        "keep": "júlíana sara gunnarsdóttir",
+        "drop": [
+          "júlíana sara"
+        ],
+        "keep_name": "Júlíana Sara Gunnarsdóttir",
+        "drop_name": "Júlíana Sara",
+        "score": 0.9,
+        "reason": "manual review"
+      },
+      {
+        "keep": "júlíana sara gunnarsson",
+        "drop": [
+          "júlíana sara"
+        ],
+        "keep_name": "Júlíana Sara Gunnarsson",
+        "drop_name": "Júlíana Sara",
+        "score": 0.9,
+        "reason": "manual review"
+      },
+      {
+        "keep": "kristófer dignus",
+        "drop": [
+          "kristófer dignus pétursson"
+        ],
+        "keep_name": "Kristófer Dignus",
+        "drop_name": "Kristófer Dignus Pétursson",
+        "score": 0.9,
+        "reason": "manual review"
+      },
+      {
+        "keep": "magnus scheving thorsteinsson",
+        "drop": [
+          "magnús scheving"
+        ],
+        "keep_name": "Magnus Scheving Thorsteinsson",
+        "drop_name": "Magnús Scheving",
+        "score": 0.9,
+        "reason": "manual review"
+      },
+      {
+        "keep": "maría sólrún sigurðardóttir",
+        "drop": [
+          "maría sólrún"
+        ],
+        "keep_name": "María Sólrún Sigurðardóttir",
+        "drop_name": "María Sólrún",
+        "score": 0.9,
+        "reason": "manual review"
+      },
+      {
+        "keep": "nanna kristín magnúsdóttir",
+        "drop": [
+          "nanna kristín"
+        ],
+        "keep_name": "Nanna Kristín Magnúsdóttir",
+        "drop_name": "Nanna Kristín",
+        "score": 0.9,
+        "reason": "manual review"
+      },
+      {
+        "keep": "ólafur evert gunnarsson",
+        "drop": [
+          "ólafur evert"
+        ],
+        "keep_name": "Ólafur Evert Gunnarsson",
+        "drop_name": "Ólafur Evert",
+        "score": 0.9,
+        "reason": "manual review"
+      },
+      {
+        "keep": "ólafur evert ulfsson",
+        "drop": [
+          "ólafur evert"
+        ],
+        "keep_name": "Ólafur Evert Ulfsson",
+        "drop_name": "Ólafur Evert",
+        "score": 0.9,
+        "reason": "manual review"
+      },
+      {
+        "keep": "ólafur gaukur þórhallsson",
+        "drop": [
+          "ólafur gaukur"
+        ],
+        "keep_name": "Ólafur Gaukur Þórhallsson",
+        "drop_name": "Ólafur Gaukur",
+        "score": 0.9,
+        "reason": "manual review"
+      },
+      {
+        "keep": "ólafur hólm einarsson",
+        "drop": [
+          "ólafur hólm"
+        ],
+        "keep_name": "Ólafur Hólm Einarsson",
+        "drop_name": "Ólafur Hólm",
+        "score": 0.9,
+        "reason": "manual review"
+      },
+      {
+        "keep": "örn marinó arnarson",
+        "drop": [
+          "örn marinó"
+        ],
+        "keep_name": "Örn Marinó Arnarson",
+        "drop_name": "Örn Marinó",
+        "score": 0.9,
+        "reason": "manual review"
+      },
+      {
+        "keep": "ragnheiður erla",
+        "drop": [
+          "ragnheiður erla bjarnadóttir"
+        ],
+        "keep_name": "Ragnheiður Erla",
+        "drop_name": "Ragnheiður Erla Bjarnadóttir",
+        "score": 0.9,
+        "reason": "manual review"
+      },
+      {
+        "keep": "sigurður anton",
+        "drop": [
+          "sigurður anton friðþjófsson"
+        ],
+        "keep_name": "Sigurður Anton",
+        "drop_name": "Sigurður Anton Friðþjófsson",
+        "score": 0.9,
+        "reason": "manual review"
+      },
+      {
+        "keep": "silja rós ragnarsdóttir",
+        "drop": [
+          "silja rós"
+        ],
+        "keep_name": "Silja Rós Ragnarsdóttir",
+        "drop_name": "Silja Rós",
+        "score": 0.9,
+        "reason": "manual review"
+      },
+      {
+        "keep": "vilberg andri pálsson",
+        "drop": [
+          "vilberg andri"
+        ],
+        "keep_name": "Vilberg Andri Pálsson",
+        "drop_name": "Vilberg Andri",
+        "score": 0.9,
+        "reason": "manual review"
       }
     ],
-    "rejected": []
+    "rejected": [
+      [
+        "dagur kári",
+        "dagur kári inga lísa middleton ragnar bragason ásgrímur sverrisson einar thor"
+      ],
+      [
+        "gunnar gunnarsson",
+        "gunnar gunnarsson jr"
+      ],
+      [
+        "hlín jóhannesdóttir",
+        "hlín jóhannesdóttir arnar benjamín kristjánsson"
+      ]
+    ]
   }
 }
