@@ -159,10 +159,15 @@ CREATE TABLE person (
                                           -- only. NOT a career count; do NOT read as a debut signal.
     career_first_feature_year INTEGER,    -- REAL IMDb career: earliest feature (kind=movie) across roles
     career_json TEXT,                     -- per-role {first_feature_year,first_feature_tconst,feature_count}
+    layer TEXT,                           -- 'creative' (holds any crew role) or 'cast' (acting only) — actors kept separate
     source TEXT, confidence TEXT
 );
 
 CREATE TABLE title_credit (title_id INTEGER, person_id INTEGER, role TEXT, job TEXT, source TEXT, confidence TEXT);
+
+-- collaboration graph: who has worked with whom, and how many times (repeat collaborations, shared>=2).
+-- edge_class lets the node map keep actors separate: 'creative' (crew↔crew), 'cast' (actor↔actor), 'mixed'.
+CREATE TABLE person_collab (a_id INTEGER, b_id INTEGER, shared INTEGER, edge_class TEXT, titles_json TEXT);
 CREATE TABLE title_company (title_id INTEGER, company_id INTEGER, role TEXT, source TEXT, confidence TEXT);
 CREATE TABLE award (title_id INTEGER, allocation_id INTEGER, year INTEGER, amount_isk INTEGER, family TEXT, source TEXT);
 
@@ -888,6 +893,39 @@ def main() -> int:
         "AND EXISTS (SELECT 1 FROM title_credit tc WHERE tc.title_id = title.id AND tc.role = 'director')"
     ).rowcount
     print(f"  director backfill: {filled} titles given a director from credits (rest remain unknown)")
+
+    # ---- collaboration graph: who has worked with whom, how many times (node connection map) ----
+    # Runs over the deduped title_credit. Each person is layered 'creative' (any crew role) or 'cast'
+    # (acting only) so actors stay a SEPARATE toggleable layer. Edges = repeat collaborations (shared>=2).
+    from itertools import combinations
+    _CAST_ROLES = {"cast", "actor", "actress", "self"}
+    title_people, person_classes = defaultdict(dict), defaultdict(set)
+    for tid, pid, role in conn.execute("SELECT title_id, person_id, role FROM title_credit"):
+        cls = "cast" if role in _CAST_ROLES else "creative"
+        person_classes[pid].add(cls)
+        # one entry per (title, person); 'creative' wins if they held both a crew and a cast role
+        if title_people[tid].get(pid) != "creative":
+            title_people[tid][pid] = cls
+    person_layer = {pid: ("creative" if "creative" in cs else "cast") for pid, cs in person_classes.items()}
+    for pid, layer in person_layer.items():
+        conn.execute("UPDATE person SET layer=? WHERE id=?", (layer, pid))
+    pair_titles = defaultdict(list)
+    for tid, people in title_people.items():
+        for a, b in combinations(sorted(people), 2):
+            pair_titles[(a, b)].append(tid)
+    edges = []
+    for (a, b), tids in pair_titles.items():
+        if len(tids) < 2:                      # keep REPEAT collaborations (worked together >1×)
+            continue
+        la, lb = person_layer[a], person_layer[b]
+        ec = la if la == lb else "mixed"
+        edges.append((a, b, len(tids), ec, json.dumps(tids[:40])))
+    conn.executemany("INSERT INTO person_collab(a_id,b_id,shared,edge_class,titles_json) VALUES(?,?,?,?,?)", edges)
+    _ec = defaultdict(int)
+    for e in edges:
+        _ec[e[3]] += 1
+    print(f"  collaboration graph: {len(edges)} repeat-collab edges "
+          f"(creative {_ec['creative']} · cast {_ec['cast']} · mixed {_ec['mixed']}) over {len(person_layer)} people")
 
     # ---- Zone 3: Klapptré CORPUS + landscape facts (isolated; reads Zone 1/2 only) ----
     kdir = ROOT / "data" / "raw" / "klapptre"
