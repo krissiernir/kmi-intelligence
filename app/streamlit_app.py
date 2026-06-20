@@ -39,6 +39,7 @@ import labels_is as L  # noqa: E402  Icelandic labels
 import person_profile  # noqa: E402  meeting-ready person dossier
 import production_profile  # noqa: E402  Framleiðslur browse + profile
 import viz  # noqa: E402  plotly cockpit charts
+import collab_network  # noqa: E402  🕸️ collaboration node map
 
 try:
     import ask_biomonsi  # needs anthropic + ANTHROPIC_API_KEY — optional
@@ -90,6 +91,7 @@ PAGE_LABELS = {
     "💰 Funding explorer": "💰 Úthlutanir",
     "🎞️ Productions ↔ funding": "🎞️ Framleiðslur",
     "🧑‍🎬 People & companies": "🧑‍🎬 Fólk og fyrirtæki",
+    "🕸️ Collaboration network": "🕸️ Samstarfsnet",
     "📐 Amounts & rebate": "📐 Upphæðir og endurgreiðsla",
     "🔎 Semantic search": "🔎 Merkingarleit",
     "💬 Ask Bíómonsi": "💬 Spyrja Bíómonsi",
@@ -322,6 +324,10 @@ elif page == "📐 Amounts & rebate":
 elif page == "🎞️ Productions ↔ funding":
     # richer browse + clickable profile (deep-links via ?title_id=); flagging passed through
     production_profile.render(st, DB, st.query_params)
+
+# ───────────────────────── Collaboration network ─────────────────────────
+elif page == "🕸️ Collaboration network":
+    collab_network.render(st, q)
 
 # ───────────────────────── Semantic search ─────────────────────────
 elif page == "🔎 Semantic search":

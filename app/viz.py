@@ -58,11 +58,18 @@ def _empty(st, msg="Engin gögn"):
 
 
 # ───────────────────────── network ─────────────────────────
+# functional-layer palette for the collaboration map (matches person.layer)
+LAYER_COLORS = {"creative": "#4C78A8", "tech": "#54A24B", "production": "#E45756",
+                "cast": "#B279A2", "flagged": "#9aa0a6"}
+LAYER_IS = {"creative": "Höfundar/listrænt", "tech": "Tækni", "production": "Framleiðsla",
+            "cast": "Leikarar", "flagged": "Til skoðunar"}
+
+
 def network(st, edges_df, backend: str | None = None, focus: str | None = None,
-            min_weight: int = 2):
+            min_weight: int = 2, node_layers: dict | None = None):
     """edges_df: columns a, b, weight (two people + #shared works). Designed AGAINST the hairball:
     with a `focus` we draw the ego-network (only edges touching it); otherwise we keep ties with
-    weight >= min_weight (worked together more than once)."""
+    weight >= min_weight. node_layers {name: layer} colours nodes by functional layer."""
     if edges_df is None or edges_df.empty:
         return _empty(st, "Engin samstarfstengsl")
     d = edges_df.copy()
@@ -81,11 +88,12 @@ def network(st, edges_df, backend: str | None = None, focus: str | None = None,
             return _echarts_network(st, edges_df, focus)
     except Exception:
         st.caption("(fínn teiknigrunnur óvirkur á þessari Streamlit-útgáfu — sýni Plotly)")
-    return _plotly_network(st, edges_df, focus)
+    return _plotly_network(st, edges_df, focus, node_layers)
 
 
-def _plotly_network(st, edges_df, focus):
+def _plotly_network(st, edges_df, focus, node_layers=None):
     import networkx as nx
+    node_layers = node_layers or {}
     G = nx.Graph()
     for _, r in edges_df.iterrows():
         G.add_edge(str(r["a"]), str(r["b"]), weight=float(r.get("weight", 1)))
@@ -94,16 +102,21 @@ def _plotly_network(st, edges_df, focus):
     for a, b in G.edges():
         ex += [pos[a][0], pos[b][0], None]; ey += [pos[a][1], pos[b][1], None]
     nodes = list(G.nodes())
+
+    def _color(n):
+        if n == focus:
+            return "#d9534f"
+        return LAYER_COLORS.get(node_layers.get(n), "#4a90d9")
     nt = go.Scatter(
         x=[pos[n][0] for n in nodes], y=[pos[n][1] for n in nodes], mode="markers+text",
         text=nodes, textposition="top center", textfont=dict(size=9),
-        hovertext=[f"{n} ({G.degree(n)} samstarf)" for n in nodes], hoverinfo="text",
-        marker=dict(size=[8 + 3 * G.degree(n) for n in nodes],
-                    color=["#d9534f" if n == focus else "#4a90d9" for n in nodes]))
+        hovertext=[f"{n} · {LAYER_IS.get(node_layers.get(n), '—')} ({G.degree(n)} samstarf)"
+                   for n in nodes], hoverinfo="text",
+        marker=dict(size=[8 + 3 * G.degree(n) for n in nodes], color=[_color(n) for n in nodes]))
     fig = go.Figure([go.Scatter(x=ex, y=ey, mode="lines", line=dict(width=0.6, color="#bbb"),
                                 hoverinfo="none"), nt])
     fig.update_layout(title="Samstarfsnet", showlegend=False, xaxis_visible=False,
-                      yaxis_visible=False, height=600)
+                      yaxis_visible=False, height=620)
     st.plotly_chart(fig, use_container_width=True)
 
 
