@@ -36,6 +36,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parent))  # make app/ modules importable
 import flagging  # noqa: E402  🚩 review queue (writes its own jsonl, never kmi.db)
 import labels_is as L  # noqa: E402  Icelandic labels
+import person_profile  # noqa: E402  meeting-ready person dossier
 import production_profile  # noqa: E402  Framleiðslur browse + profile
 import viz  # noqa: E402  plotly cockpit charts
 
@@ -254,36 +255,13 @@ elif page == "🧑‍🎬 People & companies":
                 p = matches.iloc[st.selectbox("Match", range(len(labels)), format_func=lambda i: labels[i])]
             else:
                 p = matches.iloc[0]
-            st.subheader(f"{p['display_name']}")
-            st.caption(f"Roles: {p['primary_roles']} · {p['credit_count']} credits *in the KMÍ catalog* "
-                       "(NOT a career count)"
-                       + (f" · IMDb {p['imdb_nconst']}" if p['imdb_nconst'] else "") + f" · source {p['source']}")
-            # Real IMDb career (from the careers fold) — the truthful "when did they start".
-            if pd.notna(p.get("career_first_feature_year")):
-                import json as _json
-                roles = {}
-                try:
-                    roles = _json.loads(p["career_json"]) if p.get("career_json") else {}
-                except Exception:
-                    roles = {}
-                bits = [f"**{r}**: first feature {v['first_feature_year']} "
-                        f"_{v.get('first_feature_title','')}_ ({v.get('feature_count','?')} features)"
-                        for r, v in sorted(roles.items(), key=lambda kv: kv[1].get("first_feature_year", 9999))]
-                st.markdown(f"🎬 **Career first feature: {int(p['career_first_feature_year'])}** — "
-                            + " · ".join(bits) if bits else
-                            f"🎬 **Career first feature: {int(p['career_first_feature_year'])}**")
+            person_profile.render(st, str(DB), int(p["id"]))   # meeting-ready dossier
             flagging.flag_button(st, "person", int(p["id"]), p["display_name"], queue_path=QUEUE)
-            st.markdown("**Filmography**")
-            st.dataframe(q("""SELECT t.year, t.title, tc.role, t.kind, t.kmi_funded
-                              FROM title_credit tc JOIN title t ON t.id=tc.title_id
-                              WHERE tc.person_id=? ORDER BY t.year DESC, t.title""", (int(p["id"]),)),
-                         use_container_width=True, hide_index=True)
-            st.markdown("**Frequent collaborators**")
-            st.dataframe(q("""SELECT p2.display_name AS collaborator, COUNT(*) AS together
-                              FROM title_credit c1 JOIN title_credit c2 ON c1.title_id=c2.title_id AND c1.person_id<>c2.person_id
-                              JOIN person p2 ON p2.id=c2.person_id WHERE c1.person_id=?
-                              GROUP BY c2.person_id ORDER BY together DESC LIMIT 10""", (int(p["id"]),)),
-                         use_container_width=True, hide_index=True)
+            with st.expander("🎬 Full filmography (catalog)"):
+                st.dataframe(q("""SELECT t.year, t.title, tc.role, t.kind, t.kmi_funded
+                                  FROM title_credit tc JOIN title t ON t.id=tc.title_id
+                                  WHERE tc.person_id=? ORDER BY t.year DESC, t.title""", (int(p["id"]),)),
+                             use_container_width=True, hide_index=True)
     else:
         name = st.text_input("Company name", "Glassriver")
         cos = q("SELECT * FROM company WHERE fold(name) LIKE fold(?) ORDER BY kmi_total_isk DESC LIMIT 25", (f"%{name}%",))
