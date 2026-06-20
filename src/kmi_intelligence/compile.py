@@ -168,6 +168,12 @@ CREATE TABLE title_credit (title_id INTEGER, person_id INTEGER, role TEXT, job T
 -- collaboration graph: who has worked with whom, and how many times (repeat collaborations, shared>=2).
 -- edge_class lets the node map keep actors separate: 'creative' (crew↔crew), 'cast' (actor↔actor), 'mixed'.
 CREATE TABLE person_collab (a_id INTEGER, b_id INTEGER, shared INTEGER, edge_class TEXT, titles_json TEXT);
+
+-- full IMDb filmography of key-role people (credits as data, incl. international work outside our
+-- catalog). From ingest/persons_enrich.py; LOCAL-only provenance. category = IMDb job category.
+CREATE TABLE person_imdb_credit (
+    person_id INTEGER, nconst TEXT, tconst TEXT, title TEXT, year INTEGER, category TEXT, kind TEXT
+);
 CREATE TABLE title_company (title_id INTEGER, company_id INTEGER, role TEXT, source TEXT, confidence TEXT);
 CREATE TABLE award (title_id INTEGER, allocation_id INTEGER, year INTEGER, amount_isk INTEGER, family TEXT, source TEXT);
 
@@ -940,6 +946,45 @@ def main() -> int:
     _pl, _ec = Counter(person_layer.values()), Counter(e[3] for e in edges)
     print(f"  collaboration graph: {len(edges)} repeat-collab edges over {len(person_layer)} people | "
           f"layers {dict(_pl)} | edges {dict(_ec)}")
+
+    # ---- person_imdb_credit fold: full filmographies + the 'flagged' layer (mislinked nconsts) ----
+    # From ingest/persons_enrich.py. Stores every IMDb credit (incl. international); a non-empty
+    # id_mismatch means the nconst is probably wrong/conflated → that person's layer becomes 'flagged'
+    # so the node map can quarantine them (runs AFTER the layer pass above, so it overrides).
+    pcdir = ROOT / "data" / "raw" / "person_credits"
+    if pcdir.exists():
+        nc_to_pid = {nc: pid for pid, nc in conn.execute(
+            "SELECT id, imdb_nconst FROM person WHERE imdb_nconst IS NOT NULL")}
+        cat_tconsts = defaultdict(set)        # person -> tconsts of the catalog titles we credit them on
+        for pid, tt in conn.execute(
+            "SELECT tc.person_id, t.imdb_tconst FROM title_credit tc JOIN title t ON t.id = tc.title_id "
+            "WHERE t.imdb_tconst LIKE 'tt%'"):
+            cat_tconsts[pid].add(tt)
+        cred_rows, flagged = [], 0
+        for f in pcdir.glob("nm*.json"):
+            try:
+                rec = json.loads(f.read_text(encoding="utf-8"))
+            except Exception:                                                 # noqa: BLE001
+                continue
+            pid = nc_to_pid.get(rec.get("nconst"))
+            if pid is None:
+                continue
+            imdb_tt = set()
+            for cr in rec.get("credits") or []:
+                cred_rows.append((pid, rec["nconst"], cr.get("tconst"), cr.get("title"),
+                                  cr.get("year"), cr.get("category"), cr.get("kind")))
+                if cr.get("tconst"):
+                    imdb_tt.add(cr["tconst"])
+            # 'flagged' = the nconst's WHOLE filmography shares no title with what we credit them on →
+            # the IMDb id is wrong (a same-name clash). Conservative: needs catalog tconsts to judge.
+            cat = cat_tconsts.get(pid, set())
+            if cat and not (cat & imdb_tt):
+                conn.execute("UPDATE person SET layer='flagged' WHERE id=?", (pid,))
+                flagged += 1
+        conn.executemany("INSERT INTO person_imdb_credit"
+                         "(person_id,nconst,tconst,title,year,category,kind) VALUES(?,?,?,?,?,?,?)", cred_rows)
+        print(f"  person_imdb_credit: {len(cred_rows)} credits for {len(set(r[0] for r in cred_rows))} "
+              f"people · {flagged} flagged (nconst shares no title with our credits)")
 
     # ---- Zone 3: Klapptré CORPUS + landscape facts (isolated; reads Zone 1/2 only) ----
     kdir = ROOT / "data" / "raw" / "klapptre"
