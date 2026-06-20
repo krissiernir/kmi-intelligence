@@ -5,7 +5,4 @@ pandas>=2.2.0
 plotly>=5          # viz.py cockpit charts
 networkx>=3        # collaborator-network layout
 # anthropic>=0.40 # OPTIONAL: app/ask_biomonsi.py text-to-SQL (+ ANTHROPIC_API_KEY in .env)
-# OPTIONAL viz backends (the "Stíll ▾" dropdown shows them only when installed):
-streamlit-echarts   # prettier sankey / force graph
-streamlit-agraph    # draggable collaborator network
-streamlit-aggrid    # Excel-grade browse grid
+# (echarts/agraph/aggrid viz backends dropped — incompatible with Streamlit 1.58; plotly is the stack)

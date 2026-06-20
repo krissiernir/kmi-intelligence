@@ -21,15 +21,14 @@ FAMILY_IS = {"handrit": "Handrit", "throun": "Þróun", "framleidsla": "Framlei�
 FAMILY_COLORS = {"Handrit": "#4C78A8", "Þróun": "#72B7B2", "Framleiðsla": "#E45756",
                  "Eftirvinnsla": "#F58518", "Endurgreiðsla": "#54A24B", "Aðrir": "#B279A2"}
 
-# capability -> candidate backends in preference order
+# capability -> backends. plotly/native only (echarts/agraph/aggrid dropped — incompatible with
+# Streamlit 1.58). The pluggable scaffolding below stays so a backend can be re-added later.
 _CAPS = {
-    # plotly/native FIRST = the working default (component libs lag new Streamlit); fancy ones are
-    # offered second and fall back to plotly at render if they error on this Streamlit version.
-    "network": ["plotly", "agraph", "echarts"],
-    "sankey": ["plotly", "echarts"],
+    "network": ["plotly"],
+    "sankey": ["plotly"],
     "treemap": ["plotly"],
-    "trends": ["plotly", "echarts"],
-    "browse": ["native", "aggrid"],
+    "trends": ["plotly"],
+    "browse": ["native"],
 }
 _MODULE = {"echarts": "streamlit_echarts", "agraph": "streamlit_agraph", "aggrid": "st_aggrid"}
 _LABEL = {"native": "Einfalt (Streamlit)", "plotly": "Plotly", "echarts": "ECharts",
