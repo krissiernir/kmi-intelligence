@@ -23,11 +23,13 @@ FAMILY_COLORS = {"Handrit": "#4C78A8", "Þróun": "#72B7B2", "Framleiðsla": "#E
 
 # capability -> candidate backends in preference order
 _CAPS = {
-    "network": ["agraph", "echarts", "plotly"],
-    "sankey": ["echarts", "plotly"],
+    # plotly/native FIRST = the working default (component libs lag new Streamlit); fancy ones are
+    # offered second and fall back to plotly at render if they error on this Streamlit version.
+    "network": ["plotly", "agraph", "echarts"],
+    "sankey": ["plotly", "echarts"],
     "treemap": ["plotly"],
     "trends": ["plotly", "echarts"],
-    "browse": ["aggrid", "native"],
+    "browse": ["native", "aggrid"],
 }
 _MODULE = {"echarts": "streamlit_echarts", "agraph": "streamlit_agraph", "aggrid": "st_aggrid"}
 _LABEL = {"native": "Einfalt (Streamlit)", "plotly": "Plotly", "echarts": "ECharts",
@@ -73,10 +75,13 @@ def network(st, edges_df, backend: str | None = None, focus: str | None = None,
         return _empty(st, "Engin sterk samstarfstengsl (sía: ≥%d sameiginleg verk)" % min_weight)
     edges_df = d
     backend = backend or (available_backends("network") or ["plotly"])[0]
-    if backend == "agraph":
-        return _agraph_network(st, edges_df, focus)
-    if backend == "echarts":
-        return _echarts_network(st, edges_df, focus)
+    try:
+        if backend == "agraph":
+            return _agraph_network(st, edges_df, focus)
+        if backend == "echarts":
+            return _echarts_network(st, edges_df, focus)
+    except Exception:
+        st.caption("(fínn teiknigrunnur óvirkur á þessari Streamlit-útgáfu — sýni Plotly)")
     return _plotly_network(st, edges_df, focus)
 
 
@@ -159,12 +164,15 @@ def sankey(st, alloc_df, backend: str | None = None):
         src.append(node("· " + str(b))); tgt.append(node(str(c))); val.append(float(amt))
 
     if backend == "echarts":
-        from streamlit_echarts import st_echarts
-        st_echarts({"title": {"text": "Flæði fjármagns"},
-                    "series": [{"type": "sankey", "data": [{"name": n} for n in labels],
-                                "links": [{"source": labels[s], "target": labels[t], "value": v}
-                                          for s, t, v in zip(src, tgt, val)]}]}, height="600px")
-        return
+        try:
+            from streamlit_echarts import st_echarts
+            st_echarts({"title": {"text": "Flæði fjármagns"},
+                        "series": [{"type": "sankey", "data": [{"name": n} for n in labels],
+                                    "links": [{"source": labels[s], "target": labels[t], "value": v}
+                                              for s, t, v in zip(src, tgt, val)]}]}, height="600px")
+            return
+        except Exception:
+            st.caption("(ECharts óvirkt á þessari Streamlit-útgáfu — sýni Plotly)")
     fig = go.Figure(go.Sankey(node=dict(label=labels, pad=15, thickness=14),
                               link=dict(source=src, target=tgt, value=val)))
     fig.update_layout(title="Flæði fjármagns: flokkur → tegund → fyrirtæki", font_size=11)
@@ -200,12 +208,15 @@ def browse_table(st, df, id_col: str, backend: str | None = None, key: str = "br
     """Render a table; return the selected row's id_col value (or None). df must include id_col."""
     backend = backend or (available_backends("browse") or ["native"])[0]
     if backend == "aggrid":
-        from st_aggrid import AgGrid, GridOptionsBuilder
-        gob = GridOptionsBuilder.from_dataframe(df)
-        gob.configure_selection("single")
-        grid = AgGrid(df, gridOptions=gob.build(), height=420, key=key)
-        sel = grid.get("selected_rows") or []
-        return sel[0][id_col] if sel else None
+        try:
+            from st_aggrid import AgGrid, GridOptionsBuilder
+            gob = GridOptionsBuilder.from_dataframe(df)
+            gob.configure_selection("single")
+            grid = AgGrid(df, gridOptions=gob.build(), height=420, key=key)
+            sel = grid.get("selected_rows") or []
+            return sel[0][id_col] if sel else None
+        except Exception:
+            pass  # fall through to native dataframe
     try:
         ev = st.dataframe(df, use_container_width=True, hide_index=True,
                           on_select="rerun", selection_mode="single-row", key=key)

@@ -295,7 +295,7 @@ elif page == "📐 Amounts & rebate":
 
     st.subheader("Application maxima (per gátta)")
     st.dataframe(q("""SELECT gatta_id, name_is, family,
-                        CASE WHEN max_amount_isk IS NULL THEN 'scope-dependent' ELSE max_amount_isk END AS max_isk,
+                        CASE WHEN max_amount_isk IS NULL THEN 'scope-dependent' ELSE CAST(max_amount_isk AS TEXT) END AS max_isk,
                         amount_basis FROM grant_streams
                       WHERE family IN ('handrit','throun','eftirvinnsla') ORDER BY format_track, stage, level"""),
                  use_container_width=True, hide_index=True)
