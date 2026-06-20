@@ -895,18 +895,35 @@ def main() -> int:
     print(f"  director backfill: {filled} titles given a director from credits (rest remain unknown)")
 
     # ---- collaboration graph: who has worked with whom, how many times (node connection map) ----
-    # Runs over the deduped title_credit. Each person is layered 'creative' (any crew role) or 'cast'
-    # (acting only) so actors stay a SEPARATE toggleable layer. Edges = repeat collaborations (shared>=2).
+    # Each person is layered by their MOST-FREQUENT department so the node map can keep the functional
+    # groups separate: creative (authorship/art) · tech (craft) · production (business) · cast (actors).
+    # 'flagged' is reserved for mislinked nconsts (set by the person_credits fold). Edges = repeat
+    # collaborations (shared>=2); 'thanks' credits are not collaborations and are ignored.
+    from collections import Counter
     from itertools import combinations
-    _CAST_ROLES = {"cast", "actor", "actress", "self"}
-    title_people, person_classes = defaultdict(dict), defaultdict(set)
+    ROLE_LAYER = {
+        "cast": "cast",
+        "director": "creative", "writer": "creative", "composer": "creative", "production_designer": "creative",
+        "art_director": "creative", "costume_designer": "creative", "set_decorator": "creative",
+        "music_department": "creative", "art_department": "creative", "animation_department": "creative",
+        "cinematographer": "tech", "camera_department": "tech", "sound_department": "tech", "editor": "tech",
+        "editorial_department": "tech", "visual_effects": "tech", "special_effects": "tech",
+        "make_up_department": "tech", "costume_department": "tech", "script_department": "tech",
+        "stunts": "tech", "transportation_department": "tech",
+        "producer": "production", "production_manager": "production", "production_department": "production",
+        "assistant_director": "production", "location_management": "production",
+        "casting_department": "production", "casting_director": "production", "miscellaneous": "production",
+    }  # "thanks" intentionally absent → ignored
+    _PRIORITY = ("creative", "production", "tech", "cast")     # tie-break: artistic identity first
+    title_people, person_counts = defaultdict(set), defaultdict(Counter)
     for tid, pid, role in conn.execute("SELECT title_id, person_id, role FROM title_credit"):
-        cls = "cast" if role in _CAST_ROLES else "creative"
-        person_classes[pid].add(cls)
-        # one entry per (title, person); 'creative' wins if they held both a crew and a cast role
-        if title_people[tid].get(pid) != "creative":
-            title_people[tid][pid] = cls
-    person_layer = {pid: ("creative" if "creative" in cs else "cast") for pid, cs in person_classes.items()}
+        lyr = ROLE_LAYER.get(role)
+        if not lyr:
+            continue
+        person_counts[pid][lyr] += 1
+        title_people[tid].add(pid)
+    person_layer = {pid: max(cnt, key=lambda k: (cnt[k], -_PRIORITY.index(k)))
+                    for pid, cnt in person_counts.items()}
     for pid, layer in person_layer.items():
         conn.execute("UPDATE person SET layer=? WHERE id=?", (layer, pid))
     pair_titles = defaultdict(list)
@@ -918,14 +935,11 @@ def main() -> int:
         if len(tids) < 2:                      # keep REPEAT collaborations (worked together >1×)
             continue
         la, lb = person_layer[a], person_layer[b]
-        ec = la if la == lb else "mixed"
-        edges.append((a, b, len(tids), ec, json.dumps(tids[:40])))
+        edges.append((a, b, len(tids), la if la == lb else "mixed", json.dumps(tids[:40])))
     conn.executemany("INSERT INTO person_collab(a_id,b_id,shared,edge_class,titles_json) VALUES(?,?,?,?,?)", edges)
-    _ec = defaultdict(int)
-    for e in edges:
-        _ec[e[3]] += 1
-    print(f"  collaboration graph: {len(edges)} repeat-collab edges "
-          f"(creative {_ec['creative']} · cast {_ec['cast']} · mixed {_ec['mixed']}) over {len(person_layer)} people")
+    _pl, _ec = Counter(person_layer.values()), Counter(e[3] for e in edges)
+    print(f"  collaboration graph: {len(edges)} repeat-collab edges over {len(person_layer)} people | "
+          f"layers {dict(_pl)} | edges {dict(_ec)}")
 
     # ---- Zone 3: Klapptré CORPUS + landscape facts (isolated; reads Zone 1/2 only) ----
     kdir = ROOT / "data" / "raw" / "klapptre"
