@@ -35,9 +35,11 @@ A. ✅ **DONE — Older KMÍ úthlutanir backfill (pre-2021).** `ingest/uthlutan
    folded by compile alongside the PDFs. Result: matched 603→940, before_window 255→223. Source-traced
    (`...wayback`, needs_verification). *Refinements left:* pre-2015 ("fyrri-ár" page), vilyrði→grant
    reconciliation, ER of the new pre-2021 titles/people against the existing spine.
-B. **Deep persons enrichment** — for key-role people, scrape web + IMDb bios beyond first-feature:
-   training, breakthrough, "what they started doing". Careers fold gave first-feature; add a narrative/bio
-   layer (new person fields or a `person_bio` table). Local-only IMDb provenance.
+B. **Deep persons enrichment** — *started:* `app/person_profile.py` is a meeting-ready dossier
+   (projects, credits, real first-feature, **KMÍ funding approvals matched to writer/director/producer
+   over 2015–24** w/ by-family breakdown, top collaborators, copy-paste markdown export). *Still to do:*
+   web/IMDb narrative bio (training, breakthrough), per-collaborator drill-down ("X projects with Y"),
+   and folding NGO board/membership context once C lands. Local-only provenance.
 C. **NGO / organizations zone + connection map** — scrape the 13 `db-import-staging/manualresources.md`
    sites (guilds, unions, academies, festivals, agencies) to their fullest with **scrapling** (raw saved
    as provenance); model `organization` + `membership`/`role`/`board` → people↔orgs↔films graph.
