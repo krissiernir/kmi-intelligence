@@ -28,9 +28,17 @@ if not DB.exists():
     st.stop()
 
 
+def _fold(s) -> str:
+    """Lowercase + strip diacritics so 'Ólaf' matches 'Olaf' (þ/ð/æ/ö kept — distinct letters)."""
+    import unicodedata
+    return "".join(ch for ch in unicodedata.normalize("NFKD", str(s or "").lower())
+                   if not unicodedata.combining(ch))
+
+
 @st.cache_data
 def q(sql: str, params: tuple = ()) -> pd.DataFrame:
     with sqlite3.connect(DB) as c:
+        c.create_function("fold", 1, _fold, deterministic=True)  # diacritic-insensitive search
         return pd.read_sql_query(sql, c, params=params)
 
 
@@ -179,14 +187,24 @@ elif page == "🧑‍🎬 People & companies":
                "registry. Name-based resolution; same-name people may merge.")
     kind = st.radio("Look up a", ["Person", "Company"], horizontal=True)
     if kind == "Person":
-        name = st.text_input("Person name", "Hlynur Pálmason")
-        p = q("SELECT * FROM person WHERE display_name LIKE ? ORDER BY credit_count DESC LIMIT 1", (f"%{name}%",))
-        if p.empty:
+        name = st.text_input("Person name", "Olaf de Fleur")
+        matches = q("SELECT id, display_name, primary_roles, credit_count, imdb_nconst, source FROM person "
+                    "WHERE fold(display_name) LIKE fold(?) ORDER BY credit_count DESC LIMIT 25", (f"%{name}%",))
+        if matches.empty:
             st.info("No match.")
         else:
-            p = p.iloc[0]
+            if len(matches) > 1:
+                st.caption(f"⚠ {len(matches)} matches — same-name rows may be the *same person* not yet "
+                           "merged (run `make resolve`/`make review`). Pick one:")
+                labels = [f"{r.display_name} — {r.credit_count} credits"
+                          + (f" · IMDb {r.imdb_nconst}" if r.imdb_nconst else "")
+                          + f" · {r.source} · #{r.id}" for r in matches.itertuples()]
+                p = matches.iloc[st.selectbox("Match", range(len(labels)), format_func=lambda i: labels[i])]
+            else:
+                p = matches.iloc[0]
             st.subheader(f"{p['display_name']}")
-            st.caption(f"Roles: {p['primary_roles']} · {p['credit_count']} credits")
+            st.caption(f"Roles: {p['primary_roles']} · {p['credit_count']} credits"
+                       + (f" · IMDb {p['imdb_nconst']}" if p['imdb_nconst'] else "") + f" · source {p['source']}")
             st.markdown("**Filmography**")
             st.dataframe(q("""SELECT t.year, t.title, tc.role, t.kind, t.kmi_funded
                               FROM title_credit tc JOIN title t ON t.id=tc.title_id
@@ -200,11 +218,15 @@ elif page == "🧑‍🎬 People & companies":
                          use_container_width=True, hide_index=True)
     else:
         name = st.text_input("Company name", "Glassriver")
-        co = q("SELECT * FROM company WHERE name LIKE ? ORDER BY kmi_total_isk DESC LIMIT 1", (f"%{name}%",))
-        if co.empty:
+        cos = q("SELECT * FROM company WHERE fold(name) LIKE fold(?) ORDER BY kmi_total_isk DESC LIMIT 25", (f"%{name}%",))
+        if cos.empty:
             st.info("No match.")
         else:
-            co = co.iloc[0]
+            if len(cos) > 1:
+                labels = [f"{r.name} — {r.kmi_grants_count or 0} grants · {r.type or '?'} · #{r.id}" for r in cos.itertuples()]
+                co = cos.iloc[st.selectbox("Match", range(len(labels)), format_func=lambda i: labels[i])]
+            else:
+                co = cos.iloc[0]
             st.subheader(co["name"])
             st.caption(f"{'SÍK member · ' if co['is_sik_member'] else ''}{co['website'] or ''}  ·  "
                        f"{co['kmi_grants_count']} grants / {isk(co['kmi_total_isk'])}")
