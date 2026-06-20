@@ -450,15 +450,21 @@ def main() -> int:
         t = _re.sub(r"\(.*?\)", " ", (t or "").lower())
         return _re.sub(r"\s+", " ", _re.sub(r"[^0-9a-záéíóúýþæöð]+", " ", t)).strip()
 
-    # human-confirmed company merges (from the review UI) collapse duplicates at build time
+    # human-confirmed merges (from the review UI) collapse duplicates at build time.
+    # Format: {"company": {merges:[{keep,drop,...}]}, "person": {...}}  (old flat = company-only).
     merges_path = ROOT / "data" / "curated" / "entity_merges.json"
-    _merge_redirect, _merge_log = {}, []
+    _merge_redirect, _merge_log = {}, []        # company: norm -> keep_norm, + alias log
+    _person_redirect, _person_merge_log = {}, []  # person:  norm -> keep_norm, + alias log
     if merges_path.exists():
         _md = json.loads(merges_path.read_text(encoding="utf-8"))
-        for m in _md.get("merges", []):
+        for m in (_md.get("company", {}).get("merges", []) or _md.get("merges", [])):
             for drop in m.get("drop", []):
                 _merge_redirect[drop] = m["keep"]
                 _merge_log.append((m["keep"], drop, m.get("drop_name", drop), m.get("reason", "")))
+        for m in _md.get("person", {}).get("merges", []):
+            for drop in m.get("drop", []):
+                _person_redirect[drop] = m["keep"]
+                _person_merge_log.append((m["keep"], drop, m.get("drop_name", drop), m.get("keep_name", m["keep"])))
 
     def _cnorm(s):  # company norm (drops legal suffixes); applies confirmed merges
         s = _re.sub(r"\b(ehf|slf|sf|hf|ses)\b", " ", (s or "").lower())
@@ -596,14 +602,15 @@ def main() -> int:
     # ---- people + title_credit + title_company ----
     people = {}
     pid = [0]
+    _keep_display = {kn: kname for kn, _, _, kname in _person_merge_log}  # canonical norm -> display
 
     def _person(name):
-        norm = _norm(name)
+        norm = _person_redirect.get(_norm(name), _norm(name))  # apply confirmed person merges
         if not norm:
             return None
         if norm not in people:
             pid[0] += 1
-            people[norm] = {"id": pid[0], "display": name.strip(), "norm": norm}
+            people[norm] = {"id": pid[0], "display": _keep_display.get(norm, name.strip()), "norm": norm}
         return people[norm]["id"]
 
     credit_set, credits, tco_set, tcos = set(), [], set(), []
@@ -640,6 +647,11 @@ def main() -> int:
                      (i, info["display"], info["norm"], ",".join(sorted(proles.get(i, []))), pcount.get(i, 0), "src.uthlutanir", "needs_verification"))
     conn.executemany("INSERT INTO title_credit(title_id,person_id,role,source,confidence) VALUES(?,?,?,?,?)", credits)
     conn.executemany("INSERT INTO title_company(title_id,company_id,role,source,confidence) VALUES(?,?,?,?,?)", tcos)
+    # log confirmed person merges (dropped name now resolves to the canonical person)
+    for keep_norm, drop_norm, drop_name, _ in _person_merge_log:
+        if keep_norm in people:
+            aliases.append(("person", drop_name, drop_norm, people[keep_norm]["id"], "entity_merges",
+                            "manual_merge", "verified", "resolved"))
     conn.executemany("INSERT INTO alias(entity_type,raw_string,raw_norm,entity_id,source,match_method,confidence,status) VALUES(?,?,?,?,?,?,?,?)", aliases)
 
     # ---- B4: IMDb full-credits fold (src.imdbinfo) — Zone 2 ONLY, strong keys nconst/conmst ----

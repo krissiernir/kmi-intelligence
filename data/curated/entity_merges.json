@@ -1,5 +1,21 @@
 {
-  "_about": "Human-confirmed entity merges (from make review), applied by compile.py. dropped norms collapse into keep.",
-  "merges": [],
-  "rejected": []
+  "_about": "Human-confirmed entity merges, applied by compile.py. {company,person}.{merges,rejected}; dropped norms collapse into keep.",
+  "company": {
+    "merges": [],
+    "rejected": []
+  },
+  "person": {
+    "merges": [
+      {
+        "keep": "olaf de fleur johannesson",
+        "drop": [
+          "olaf de fleur"
+        ],
+        "keep_name": "Ólafur de Fleur Jóhannesson",
+        "drop_name": "Olaf de Fleur",
+        "reason": "pseudonyms of the same director (user-confirmed): Ólaf de Fleur / Ólaf Jóhannsson"
+      }
+    ],
+    "rejected": []
+  }
 }

@@ -111,11 +111,25 @@ def _jlen(p, key=None):
 
 
 def queues(m: dict) -> list[str]:
-    cand = ROOT / "data" / "staged" / "merge_candidates.json"
-    mrg = ROOT / "data" / "curated" / "entity_merges.json"
+    cd = json.loads((ROOT / "data" / "staged" / "merge_candidates.json").read_text()) \
+        if (ROOT / "data" / "staged" / "merge_candidates.json").exists() else {}
+    if isinstance(cd, list):
+        cd = {"company": cd}
+    md = json.loads((ROOT / "data" / "curated" / "entity_merges.json").read_text()) \
+        if (ROOT / "data" / "curated" / "entity_merges.json").exists() else {}
+    if "merges" in md:  # old flat (company-only)
+        md = {"company": {"merges": md.get("merges", []), "rejected": md.get("rejected", [])}}
+
+    def cc(e):
+        return len(cd.get(e, []))
+
+    def mc(e, k):
+        return len(md.get(e, {}).get(k, []))
+
     return [
-        f"Splink merge candidates to review (run `make review`): {_jlen(cand)}",
-        f"  ↳ confirmed merges applied: {_jlen(mrg,'merges')} · kept-separate: {_jlen(mrg,'rejected')}",
+        f"Merge candidates to review (`make review`): company {cc('company')} · person {cc('person')}",
+        f"  ↳ merged: company {mc('company','merges')} · person {mc('person','merges')}  ·  "
+        f"kept-separate: company {mc('company','rejected')} · person {mc('person','rejected')}",
         f"Unresolved entity aliases (legacy fuzzy queue): {m.get('alias_unresolved')}",
         f"Parked tconst candidates (imdb_resolve_review.json): {_jlen(ROOT/'data'/'staged'/'imdb_resolve_review.json')}",
         f"Allocations with no amount (vilyrði-only / parse gap): {m.get('alloc_no_amount')}",

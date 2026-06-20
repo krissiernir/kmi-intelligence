@@ -1,8 +1,9 @@
-"""One-page entity-resolution reviewer — confirm/reject Splink's duplicate-company candidates.
+"""One-page entity-resolution reviewer — confirm/reject Splink's duplicate candidates (companies & people).
 
-Reads data/staged/merge_candidates.json (from `make resolve`), shows one pair at a time with the
-evidence (shared films, funding, SÍK), and writes decisions to data/curated/entity_merges.json —
-which `make build` applies (the dropped name collapses into the canonical company, logged in alias).
+Reads data/staged/merge_candidates.json ({"company":[...], "person":[...]} from `make resolve`),
+shows one pair at a time with evidence (shared films/titles, funding, IMDb nconst), and writes
+decisions to data/curated/entity_merges.json ({company,person}.{merges,rejected}) — applied by
+`make build` (the dropped name collapses into the canonical, logged in alias).
 
 Run:  make review     (streamlit run app/review.py in .venv)
 """
@@ -19,80 +20,88 @@ st.set_page_config(page_title="Entity resolution", layout="centered")
 
 
 def load_merges():
-    if MERGES.exists():
-        d = json.loads(MERGES.read_text(encoding="utf-8"))
-        d.setdefault("merges", [])
-        d.setdefault("rejected", [])
-        return d
-    return {"_about": "Human-confirmed entity merges, applied by compile.py. 'drop' norms collapse into 'keep'.",
-            "merges": [], "rejected": []}
+    d = json.loads(MERGES.read_text(encoding="utf-8")) if MERGES.exists() else {}
+    if "merges" in d:  # migrate old flat (company-only) format
+        d = {"company": {"merges": d.get("merges", []), "rejected": d.get("rejected", [])}}
+    for e in ("company", "person"):
+        d.setdefault(e, {"merges": [], "rejected": []})
+    d.setdefault("_about", "Human-confirmed entity merges, applied by compile.py.")
+    return d
 
 
 def save_merges(d):
     MERGES.write_text(json.dumps(d, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
-def decided_set(d):
+def decided(em):
     s = set()
-    for m in d["merges"]:
+    for m in em["merges"]:
         for drop in m.get("drop", []):
             s.add(frozenset((m["keep"], drop)))
-    for a, b in d["rejected"]:
+    for a, b in em["rejected"]:
         s.add(frozenset((a, b)))
     return s
 
 
-cands = json.loads(CAND.read_text(encoding="utf-8")) if CAND.exists() else []
+cands = json.loads(CAND.read_text(encoding="utf-8")) if CAND.exists() else {}
+if isinstance(cands, list):  # migrate old flat format
+    cands = {"company": cands}
 merges = load_merges()
-decided = decided_set(merges)
-skipped = st.session_state.setdefault("skipped", set())
-todo = [c for c in cands
-        if frozenset((c["keep_norm"], c["drop_norm"])) not in decided
+
+st.title("🔗 Entity resolution")
+if not CAND.exists():
+    st.warning("No candidates yet. Run `make resolve` (or `make resolve all`).")
+    st.stop()
+
+entity = st.radio("Resolve", ["company", "person"], horizontal=True,
+                  format_func=lambda e: f"{e.title()}s ({len(cands.get(e, []))})")
+items = cands.get(entity, [])
+em = merges[entity]
+done_set = decided(em)
+skipped = st.session_state.setdefault(f"skip_{entity}", set())
+todo = [c for c in items
+        if frozenset((c["keep_norm"], c["drop_norm"])) not in done_set
         and frozenset((c["keep_norm"], c["drop_norm"])) not in skipped]
 
-st.title("🔗 Entity resolution — company duplicates")
-if not CAND.exists():
-    st.warning("No candidates yet. Run `make resolve` first.")
-    st.stop()
-done = len(cands) - len(todo)
-st.progress(done / len(cands) if cands else 1.0,
-            text=f"{done}/{len(cands)} reviewed · {len(merges['merges'])} merged · {len(merges['rejected'])} kept-separate")
+done = len(items) - len(todo)
+st.progress(done / len(items) if items else 1.0,
+            text=f"{done}/{len(items)} reviewed · {len(em['merges'])} merged · {len(em['rejected'])} kept-separate")
 if not todo:
-    st.success("All candidate pairs reviewed 🎉  Run `make build` to apply the merges.")
+    st.success(f"All {entity} candidates reviewed 🎉  Run `make build` to apply.")
     st.stop()
 
 c = todo[0]
-st.caption(f"Splink match probability: **{c['score']:.3f}**  ·  shared films: **{c['shared_films']}**")
-swap = st.toggle("Keep the right-hand one as canonical instead", value=False)
-left, right = (c, c)  # display values are symmetric; canonical chosen by swap
+work = "films" if entity == "company" else "titles"
+st.caption(f"match probability **{c['score']:.3f}** · shared {work}: **{c['shared']}**"
+           + (f" · method {c['method']}" if c.get("method") else ""))
+swap = st.toggle("Keep the right-hand one instead", value=False)
 keep_name, keep_norm = (c["drop_name"], c["drop_norm"]) if swap else (c["keep_name"], c["keep_norm"])
 drop_name, drop_norm = (c["keep_name"], c["keep_norm"]) if swap else (c["drop_name"], c["drop_norm"])
 
 a, b = st.columns(2)
-with a:
-    st.subheader("✅ Keep" if not swap else "drop →")
-    st.markdown(f"**{c['keep_name']}**")
-    st.caption(f"films: {c['keep_films']} · funding: {c['keep_isk']:,} kr · SÍK: {'yes' if c['keep_sik'] else 'no'}")
-with b:
-    st.subheader("drop →" if not swap else "✅ Keep")
-    st.markdown(f"**{c['drop_name']}**")
-    st.caption(f"films: {c['drop_films']} · funding: {c['drop_isk']:,} kr")
+for col, side, lbl in ((a, "keep", "✅ Keep" if not swap else "drop →"),
+                       (b, "drop", "drop →" if not swap else "✅ Keep")):
+    with col:
+        st.subheader(lbl)
+        st.markdown(f"**{c[side + '_name']}**")
+        extra = f" · IMDb {c.get(side + '_nconst')}" if entity == "person" and c.get(side + "_nconst") else ""
+        st.caption(f"{c[side + '_works']} {work}{extra}")
 
 st.divider()
 b1, b2, b3 = st.columns(3)
 if b1.button("✅ Same — merge", use_container_width=True, type="primary"):
-    merges["merges"].append({"keep": keep_norm, "drop": [drop_norm], "drop_name": drop_name,
-                             "keep_name": keep_name, "score": c["score"], "reason": "manual review"})
+    em["merges"].append({"keep": keep_norm, "drop": [drop_norm], "keep_name": keep_name,
+                         "drop_name": drop_name, "score": c["score"], "reason": "manual review"})
     save_merges(merges)
     st.rerun()
 if b2.button("❌ Different — keep separate", use_container_width=True):
-    merges["rejected"].append([c["keep_norm"], c["drop_norm"]])
+    em["rejected"].append([c["keep_norm"], c["drop_norm"]])
     save_merges(merges)
     st.rerun()
-if b3.button("⏭ Skip for now", use_container_width=True):
+if b3.button("⏭ Skip", use_container_width=True):
     skipped.add(frozenset((c["keep_norm"], c["drop_norm"])))
     st.rerun()
 
-with st.expander("remaining queue (next 15)"):
+with st.expander(f"remaining {entity} queue (next 15)"):
     for x in todo[1:16]:
-        st.text(f"{x['score']:.3f}  {x['keep_name'][:30]:30} ⇄ {x['drop_name'][:30]}  (shared {x['shared_films']})")
+        st.text(f"{x['score']:.2f}  {x['keep_name'][:28]:28} ⇄ {x['drop_name'][:28]}  (shared {x['shared']})")
