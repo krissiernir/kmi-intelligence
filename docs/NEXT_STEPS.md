@@ -29,9 +29,12 @@ is "unfunded" and no film has "no director"; we model `known | unknown`, never a
 ## Open work (priority order)
 
 ### 🔴 Phase 2 — industry graph + persons (active focus)
-A. **Older KMÍ úthlutanir backfill (pre-2021)** — films got script grants well before 2021; KMÍ
-   publishes annual úthlutanir. Fetch + parse older years (`make parse` exists) → extends Zone 1
-   backwards, shrinks `before_window`. *This is the most direct fix for "we can't assume not funded".*
+A. ✅ **DONE — Older KMÍ úthlutanir backfill (pre-2021).** `ingest/uthlutanir_archive.py` recovers the
+   2015–2020 allocation tables from the Internet Archive (the new CMS dropped them) → **779 pre-2021
+   allocations**, ledger now 2015–24. `make parse-archive` (harvest+parse) → `allocations_archive.json`,
+   folded by compile alongside the PDFs. Result: matched 603→940, before_window 255→223. Source-traced
+   (`...wayback`, needs_verification). *Refinements left:* pre-2015 ("fyrri-ár" page), vilyrði→grant
+   reconciliation, ER of the new pre-2021 titles/people against the existing spine.
 B. **Deep persons enrichment** — for key-role people, scrape web + IMDb bios beyond first-feature:
    training, breakthrough, "what they started doing". Careers fold gave first-feature; add a narrative/bio
    layer (new person fields or a `person_bio` table). Local-only IMDb provenance.
